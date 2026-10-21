@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Account Settings</title>
+
+  <style>
+    :root{
+      --bg1:#7a8cff;
+      --bg2:#7a58b8;
+
+      --card:#ffffff;
+      --text:#1f2330;
+      --muted:#5c6375;
+
+      --line:#e8eaf5;
+      --line2:#eef0fb;
+
+      --primary:#6c6ee9;
+      --primary2:#7b55c7;
+
+      --shadow: 0 14px 38px rgba(24, 28, 58, .18);
+      --shadow2: 0 10px 24px rgba(24, 28, 58, .12);
+
+      --r14:14px;
+      --r18:18px;
+      --r22:22px;
+      --r26:26px;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans";
+      color:var(--text);
+      background:
+        radial-gradient(1200px 700px at 10% 10%, rgba(255,255,255,.24), transparent 60%),
+        radial-gradient(900px 600px at 80% 20%, rgba(255,255,255,.18), transparent 60%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+      overflow-x:hidden;
+    }
+
+    .safe{
+      padding-top: max(14px, env(safe-area-inset-top));
+      padding-bottom: max(14px, env(safe-area-inset-bottom));
+    }
+
+    .shell{
+      min-height: 100dvh;
+      padding: clamp(14px, 2.5vw, 28px);
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+    }
+
+    .app{
+      width:min(980px, 100%);
+    }
+
+    .glass{
+      background: rgba(255,255,255,.18);
+      border: 1px solid rgba(255,255,255,.24);
+      border-radius: var(--r26);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      overflow:hidden;
+    }
+
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:14px;
+      padding: 18px 18px 16px 18px;
+      border-bottom: 1px solid rgba(255,255,255,.22);
+    }
+
+    .brand{
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      min-width:0;
+    }
+    .logo{
+      width:44px; height:44px;
+      border-radius: 14px;
+      display:grid; place-items:center;
+      background: rgba(255,255,255,.28);
+      border:1px solid rgba(255,255,255,.28);
+      flex: 0 0 auto;
+    }
+
+    .brand h1{
+      margin:0;
+      font-size: clamp(20px, 2.2vw, 34px);
+      letter-spacing:.2px;
+      line-height:1.15;
+      color:#0b0f1a;
+    }
+    .brand p{
+      margin:6px 0 0 0;
+      color: rgba(10,12,20,.68);
+      line-height:1.35;
+      max-width: 62ch;
+      font-size: 14px;
+    }
+
+    .actions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .btn{
+      appearance:none;
+      border:1px solid rgba(255,255,255,.40);
+      background: rgba(255,255,255,.72);
+      color:#1f2330;
+      padding:10px 14px;
+      border-radius: 14px;
+      font-weight: 800;
+      font-size:14px;
+      cursor:pointer;
+      box-shadow: 0 8px 18px rgba(20, 22, 46, .10);
+      transition: transform .06s ease, filter .12s ease, background .12s ease;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      user-select:none;
+      white-space:nowrap;
+    }
+    .btn:hover{ filter: brightness(1.02); }
+    .btn:active{ transform: translateY(1px); }
+
+    .btn.primary{
+      background: linear-gradient(135deg, var(--primary), var(--primary2));
+      color:#fff;
+      border-color: rgba(255,255,255,.30);
+    }
+
+    .content{
+      padding: 16px;
+    }
+
+    .card{
+      background: rgba(255,255,255,.92);
+      border: 1px solid rgba(255,255,255,.55);
+      border-radius: var(--r22);
+      box-shadow: var(--shadow2);
+      overflow:hidden;
+    }
+
+    .cardHeader{
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line2);
+      background: linear-gradient(180deg, rgba(124,132,255,.10), rgba(255,255,255,.0));
+    }
+    .cardHeader b{
+      font-size: 18px;
+      letter-spacing:.2px;
+    }
+    .cardBody{
+      padding: 16px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    .field{
+      margin-top: 14px;
+    }
+    label{
+      display:block;
+      font-weight: 900;
+      margin-bottom: 8px;
+      letter-spacing:.1px;
+    }
+    .hint{
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 8px;
+      line-height: 1.35;
+    }
+
+    .inputWrap{
+      position:relative;
+    }
+    input[type="password"], input[type="text"]{
+      width:100%;
+      padding: 12px 44px 12px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      outline:none;
+      font-size: 14px;
+      background: #fff;
+    }
+    input:focus{
+      border-color: #cfd3ff;
+      box-shadow: 0 0 0 4px rgba(108,110,233,.12);
+    }
+
+    .toggle{
+      position:absolute;
+      right:10px;
+      top:50%;
+      transform: translateY(-50%);
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius: 12px;
+      padding: 6px 9px;
+      font-weight: 900;
+      cursor:pointer;
+      color:#3b4154;
+      font-size: 12px;
+    }
+
+    .error{
+      margin-top:10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid #ffd0d0;
+      background: #fff0f0;
+      color: #8f1111;
+      font-size: 13px;
+      display:none;
+    }
+
+    .success{
+      margin-top:10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid #bfeecf;
+      background: #e9f8ee;
+      color: #187a39;
+      font-size: 13px;
+      display:none;
+    }
+
+    .footerRow{
+      margin-top: 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      flex-wrap:wrap;
+    }
+
+    .submit{
+      width: min(520px, 100%);
+      padding: 12px 16px;
+      border-radius: 16px;
+      justify-content:center;
+    }
+
+    .muted{ color: var(--muted); }
+
+    /* Responsive */
+    @media (max-width: 520px){
+      .topbar{ padding: 16px 14px 14px 14px; }
+      .content{ padding: 12px; }
+      .cardHeader{ padding: 12px 12px; }
+      .cardBody{ padding: 12px; }
+      .brand p{ font-size: 13px; }
+      .btn{ padding: 10px 12px; border-radius: 14px; }
+      .submit{ width: 100%; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="shell safe">
+    <div class="app">
+      <div class="glass">
+        <div class="topbar">
+          <div class="brand">
+            <div style="min-width:0">
+              <h1>Account Settings</h1>
+              <p>Update your password securely. Make sure your new password is at least 6 characters.</p>
+            </div>
+          </div>
+
+          <div class="actions">
+            <a class="btn" id="backBtn" href="#">Back to Dashboard</a>
+            <a class="btn primary" id="logoutBtn" href="#">Log out</a>
+          </div>
+        </div>
+
+        <div class="content">
+          <div class="grid">
+            <section class="card">
+              <div class="cardHeader">
+                <b>Change Password</b>
+              </div>
+
+              <div class="cardBody">
+                <!-- Optional server message (if you use Flask flash/message variables) -->
+                {% if message %}
+                  <div class="success" style="display:block;">{{ message }}</div>
+                {% endif %}
+                {% if error %}
+                  <div class="error" style="display:block;">{{ error }}</div>
+                {% endif %}
+
+                <!-- Important: action="" -> POST back to same /settings/<user_id> route -->
+                <form id="pwForm" method="POST" action="">
+                  <div class="field">
+                    <label for="current_password">Current password</label>
+                    <div class="inputWrap">
+                      <input id="current_password" name="current_password" type="password" placeholder="Enter your current password" required />
+                      <button class="toggle" type="button" data-target="current_password">Show</button>
+                    </div>
+                  </div>
+
+                  <div class="field">
+                    <label for="new_password">New password</label>
+                    <div class="inputWrap">
+                      <input id="new_password" name="new_password" type="password" placeholder="Enter a new password" minlength="6" required />
+                      <button class="toggle" type="button" data-target="new_password">Show</button>
+                    </div>
+                    <div class="hint">Password must be at least 6 characters.</div>
+                  </div>
+
+                  <div class="field">
+                    <label for="confirm_password">Confirm new password</label>
+                    <div class="inputWrap">
+                      <input id="confirm_password" name="confirm_password" type="password" placeholder="Re-enter your new password" minlength="6" required />
+                      <button class="toggle" type="button" data-target="confirm_password">Show</button>
+                    </div>
+                  </div>
+
+                  <div class="error" id="clientError"></div>
+
+                  <div class="footerRow">
+                    <button class="btn primary submit" id="submitBtn" type="submit">Update password</button>
+                    <div class="muted" style="font-size:13px;">
+                      Tip: Use a unique password you don’t reuse elsewhere.
+                    </div>
+                  </div>
+                </form>
+
+              </div>
+            </section>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Flask inject
+    const USER_ID = {{ user_id | tojson }};
+
+    // Links
+    document.getElementById("backBtn").href = `/dashboard/${encodeURIComponent(USER_ID)}`;
+    document.getElementById("logoutBtn").href = `/`; // adjust if your logout route differs
+
+    // Toggle show/hide
+    document.querySelectorAll(".toggle").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const id = btn.dataset.target;
+        const input = document.getElementById(id);
+        const isPw = input.type === "password";
+        input.type = isPw ? "text" : "password";
+        btn.textContent = isPw ? "Hide" : "Show";
+      });
+    });
+
+    // Client validation
+    const form = document.getElementById("pwForm");
+    const cur = document.getElementById("current_password");
+    const npw = document.getElementById("new_password");
+    const cpw = document.getElementById("confirm_password");
+    const errBox = document.getElementById("clientError");
+    const submitBtn = document.getElementById("submitBtn");
+
+    function showError(msg){
+      errBox.textContent = msg;
+      errBox.style.display = "block";
+      submitBtn.disabled = true;
+      submitBtn.style.opacity = "0.85";
+    }
+
+    function clearError(){
+      errBox.textContent = "";
+      errBox.style.display = "none";
+      submitBtn.disabled = false;
+      submitBtn.style.opacity = "1";
+    }
+
+    function validate(){
+      const newVal = npw.value || "";
+      const confVal = cpw.value || "";
+
+      if (newVal.length > 0 && newVal.length < 6){
+        showError("New password must be at least 6 characters.");
+        return false;
+      }
+
+      if (confVal.length > 0 && newVal !== confVal){
+        showError("New password and confirmation do not match.");
+        return false;
+      }
+
+      clearError();
+      return true;
+    }
+
+    npw.addEventListener("input", validate);
+    cpw.addEventListener("input", validate);
+
+    form.addEventListener("submit", (e) => {
+      // final check before submit
+      if (!validate()){
+        e.preventDefault();
+        return;
+      }
+      // basic: prevent new password equals current password
+      if ((cur.value || "") && (npw.value || "") && cur.value === npw.value){
+        e.preventDefault();
+        showError("New password must be different from your current password.");
+        return;
+      }
+    });
+  </script>
+</body>
+</html>

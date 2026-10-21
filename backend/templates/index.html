@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#667eea" />
+  <title>剩食魔法師 | Recipe App</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="/static/manifest.json" />
+
+  <style>
+    :root{
+      --bg1:#667eea;
+      --bg2:#764ba2;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --ring: rgba(102,126,234,.25);
+      --shadow: 0 12px 40px rgba(15, 23, 42, 0.12);
+      --shadow2: 0 8px 24px rgba(15, 23, 42, 0.10);
+      --radius: 18px;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+      color:var(--text);
+      min-height:100vh;
+      background: radial-gradient(1200px 800px at 15% 15%, rgba(255,255,255,.22), transparent 60%),
+                  radial-gradient(900px 700px at 85% 35%, rgba(255,255,255,.16), transparent 55%),
+                  linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 100%);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+    }
+
+    .wrap{ width:min(1040px, 100%); }
+
+    .shell{
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.18);
+      backdrop-filter: blur(10px);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:18px 22px;
+      border-bottom:1px solid rgba(255,255,255,.18);
+    }
+
+    .brand{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      color:#fff;
+    }
+
+    .logo{
+      width:42px;height:42px;
+      border-radius:14px;
+      background: rgba(255,255,255,.16);
+      display:grid;place-items:center;
+      border:1px solid rgba(255,255,255,.22);
+    }
+
+    .brand h1{ margin:0; font-size:18px; letter-spacing:.2px; }
+    .brand .sub{ display:block; font-size:12px; opacity:.85; margin-top:2px; }
+
+    .nav{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+
+    .btn{
+      appearance:none;
+      border:0;
+      cursor:pointer;
+      border-radius: 12px;
+      padding:10px 14px;
+      font-weight:700;
+      font-size:14px;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+      user-select:none;
+      white-space:nowrap;
+    }
+
+    .btn:focus{ outline: none; box-shadow: 0 0 0 4px var(--ring); }
+
+    .btn.primary{
+      color:#fff;
+      background: rgba(255,255,255,.16);
+      border:1px solid rgba(255,255,255,.26);
+    }
+    .btn.primary:hover{ transform: translateY(-1px); box-shadow: var(--shadow2); }
+
+    .btn.solid{
+      color:#1e293b;
+      background:#fff;
+    }
+    .btn.solid:hover{ transform: translateY(-1px); box-shadow: var(--shadow2); }
+
+    .content{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap:0;
+    }
+    @media (max-width: 860px){
+      .content{ grid-template-columns: 1fr; }
+    }
+
+    .hero{
+      padding:40px 34px;
+      color:#fff;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.16);
+      border:1px solid rgba(255,255,255,.22);
+      font-size:13px;
+      font-weight:700;
+      letter-spacing:.2px;
+    }
+
+    .hero h2{
+      margin:14px 0 10px;
+      font-size:42px;
+      line-height:1.15;
+      letter-spacing:-.4px;
+    }
+
+    .hero p{
+      margin:0;
+      max-width: 46ch;
+      color: rgba(255,255,255,.86);
+      line-height:1.7;
+      font-size:15px;
+    }
+
+    .cta{
+      margin-top:18px;
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .cta .btn{
+      padding:12px 16px;
+      border-radius: 14px;
+    }
+
+    .panel{
+      background: rgba(255,255,255,.92);
+      padding:28px 26px;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+
+    .panel h3{
+      margin:0;
+      font-size:16px;
+      color:#0f172a;
+      letter-spacing:.2px;
+      font-weight:900;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:10px;
+    }
+
+    .card{
+      background: var(--card);
+      border-radius: var(--radius);
+      border:1px solid rgba(15,23,42,.08);
+      box-shadow: 0 8px 20px rgba(15,23,42,.06);
+      padding:14px 14px;
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+    }
+
+    .icon{
+      width:40px;height:40px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(102,126,234,.18), rgba(118,75,162,.18));
+      display:grid;place-items:center;
+      border:1px solid rgba(102,126,234,.20);
+      flex: 0 0 auto;
+    }
+
+    .card b{ display:block; font-size:14px; margin-bottom:4px; }
+    .card span{ display:block; font-size:13px; color: var(--muted); line-height:1.55; }
+
+    .hint{
+      margin-top:6px;
+      font-size:12px;
+      color:#64748b;
+      line-height:1.6;
+    }
+
+    .footer{
+      padding:14px 22px;
+      border-top:1px solid rgba(15,23,42,.08);
+      font-size:12px;
+      color: rgba(255,255,255,.78);
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      background: rgba(255,255,255,.08);
+    }
+
+    .footer a{
+      color:#fff;
+      opacity:.9;
+      text-decoration:none;
+    }
+    .footer a:hover{ text-decoration:underline; }
+
+    /* Mobile compact mode */
+    @media (max-width: 520px) {
+      body { padding: 14px; }
+
+      .topbar { padding: 14px 14px; }
+      .brand h1 { font-size: 16px; }
+      .brand .sub { font-size: 11px; }
+
+      .nav .btn { padding: 8px 10px; font-size: 13px; border-radius: 10px; }
+
+      .hero { padding: 22px 16px; }
+      .badge { padding: 6px 10px; font-size: 12px; }
+
+      .hero h2 {
+        font-size: 32px;
+        line-height: 1.10;
+        margin: 10px 0 8px;
+      }
+
+      .hero p {
+        font-size: 14px;
+        line-height: 1.55;
+        max-width: 40ch;
+      }
+
+      .cta { margin-top: 14px; gap: 10px; }
+      .cta .btn { padding: 10px 14px; border-radius: 12px; }
+
+      .panel { padding: 18px 14px; gap: 10px; }
+      .panel h3 { font-size: 15px; }
+
+      .card { padding: 12px 12px; border-radius: 16px; }
+      .icon { width: 36px; height: 36px; border-radius: 12px; }
+      .card b { font-size: 13px; }
+      .card span { font-size: 12.5px; }
+
+      .footer { padding: 10px 14px; font-size: 11px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="shell">
+      <div class="topbar">
+        <div class="brand">
+          <div>
+            <h1>剩食魔法師</h1>
+            <span class="sub">Fridge → Recipes | Expiry-aware recommendations</span>
+          </div>
+        </div>
+
+        <div class="nav">
+          <a class="btn primary" href="/register-page">Sign Up</a>
+          <a class="btn solid" href="/login-page">Log In</a>
+        </div>
+      </div>
+
+      <div class="content">
+        <section class="hero">
+          <div class="badge">AI × Database</div>
+          <h2>Turn your fridge<br/>into today’s dinner</h2>
+          <p>
+            Track expiry dates and get recipes that prioritize expiring ingredients.
+          </p>
+
+          <div class="cta">
+            <a class="btn solid" href="/login-page">Get Started</a>
+            <a class="btn primary" href="/register-page">Create Account</a>
+          </div>
+        </section>
+
+        <aside class="panel">
+          <h3>What you can do</h3>
+
+          <div class="grid">
+            <div class="card">
+              <div class="icon" aria-hidden="true">🧊</div>
+              <div>
+                <b>Manage your fridge</b>
+                <span>Add ingredients with expiry dates.</span>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="icon" aria-hidden="true">🤖</div>
+              <div>
+                <b>Smart recommendations</b>
+                <span>Prioritize ingredients expiring soon.</span>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="icon" aria-hidden="true">🚫</div>
+              <div>
+                <b>Dietary exclusions</b>
+                <span>Filter recipes automatically.</span>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <div class="footer">
+        <div>剩食魔法師 | Team Project</div>
+        <div>
+          <a href="/register-page">Sign Up</a> ·
+          <a href="/login-page">Log In</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("y").textContent = new Date().getFullYear();
+
+    // Optional: register Service Worker
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/static/service-worker.js")
+          .catch(err => console.error("Service Worker registration failed:", err));
+      });
+    }
+  </script>
+</body>
+</html>

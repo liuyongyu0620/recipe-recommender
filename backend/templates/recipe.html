@@ -1,0 +1,1249 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Recipe Generator • Leftover Wizard</title>
+
+  <style>
+    :root{
+      --bg1:#7C8CF3;
+      --bg2:#6B4AA8;
+      --card:#ffffff;
+      --muted:#6b7280;
+      --text:#111827;
+      --line:rgba(17,24,39,.08);
+      --shadow:0 18px 48px rgba(0,0,0,.18);
+      --shadow2:0 14px 32px rgba(17,24,39,.10);
+      --brand:#6d73ff;
+      --brand2:#6b4aa8;
+      --danger:#ef4444;
+      --ok:#22c55e;
+      --warn:#f59e0b;
+      --info:#06b6d4;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans";
+      color:var(--text);
+      background: linear-gradient(135deg, var(--bg1), var(--bg2));
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+      padding: 22px 16px 44px;
+      min-height: 100dvh;
+      overflow-x:hidden;
+      overflow-y:auto;
+    }
+
+    .shell{
+      width:min(1200px, 100%);
+      background: rgba(255,255,255,.18);
+      border:1px solid rgba(255,255,255,.28);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      overflow:hidden;
+    }
+
+    .topbar{
+      background: rgba(255,255,255,.22);
+      border-bottom:1px solid rgba(255,255,255,.22);
+      padding: 18px 18px 14px;
+    }
+    .topbar-inner{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      flex-wrap:wrap;
+    }
+    h1{
+      margin:0;
+      font-size: clamp(22px, 3.2vw, 34px);
+      letter-spacing:.2px;
+      line-height:1.15;
+      color:#0b1020;
+    }
+    .subtitle{
+      margin-top:6px;
+      color: rgba(17,24,39,.72);
+      font-size: 14px;
+      line-height:1.45;
+      max-width: 62ch;
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:flex-end;
+      flex: 0 1 auto;
+      flex-wrap:wrap;
+    }
+    .btn{
+      appearance:none;
+      border:1px solid rgba(17,24,39,.10);
+      background: rgba(255,255,255,.82);
+      color:#111827;
+      border-radius: 14px;
+      padding: 10px 14px;
+      font-weight: 800;
+      cursor:pointer;
+      box-shadow: 0 10px 20px rgba(17,24,39,.08);
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      white-space:nowrap;
+    }
+    .btn:hover{ transform: translateY(-1px); }
+    .btn:active{ transform: translateY(0); }
+    .btn-primary{
+      background: linear-gradient(135deg, var(--brand), var(--brand2));
+      color:white;
+      border:1px solid rgba(255,255,255,.18);
+    }
+
+    .content{ padding: 18px; }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.08fr .92fr;
+      gap:16px;
+      align-items:start;
+    }
+    @media (max-width: 980px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    .card{
+      background: rgba(255,255,255,.92);
+      border:1px solid rgba(17,24,39,.08);
+      border-radius: 20px;
+      box-shadow: var(--shadow2);
+      overflow:hidden;
+    }
+    .card-hd{
+      padding: 14px 16px;
+      border-bottom:1px solid rgba(17,24,39,.08);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      background: linear-gradient(180deg, rgba(255,255,255,.94), rgba(255,255,255,.88));
+    }
+    .card-title{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-size:16px;
+      font-weight:900;
+      letter-spacing:.2px;
+    }
+    .pill{
+      font-size:12px;
+      font-weight:900;
+      color:#4f46e5;
+      background: rgba(109,115,255,.14);
+      border:1px solid rgba(109,115,255,.28);
+      padding: 8px 10px;
+      border-radius: 999px;
+      white-space:nowrap;
+    }
+    .card-bd{ padding: 14px 16px 16px; }
+    .muted{ color: var(--muted); font-size: 13px; line-height:1.45; }
+
+    /* Ingredient list */
+    .tools{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom: 10px;
+    }
+    .mini-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+    .btn-mini{
+      padding: 8px 10px;
+      font-size: 12px;
+      border-radius: 12px;
+      box-shadow:none;
+      background: rgba(17,24,39,.04);
+      border:1px solid rgba(17,24,39,.10);
+      font-weight:900;
+    }
+
+    .list{
+      border:1px dashed rgba(17,24,39,.18);
+      border-radius: 16px;
+      padding: 10px;
+      max-height: 420px;
+      overflow:auto;
+      background: rgba(255,255,255,.55);
+    }
+    @media (max-width: 980px){
+      .list{ max-height: 320px; }
+    }
+
+    .row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding: 10px 10px;
+      border-radius: 14px;
+      border:1px solid rgba(17,24,39,.06);
+      background: rgba(255,255,255,.80);
+      margin-bottom: 10px;
+    }
+    .row:last-child{ margin-bottom:0; }
+    
+    .left{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+      flex:1;
+    }
+    .chk{
+      width:18px;height:18px;
+      accent-color: #6d73ff;
+      flex:0 0 auto;
+    }
+    .name{
+      font-weight:900;
+      font-size:14px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .badge{
+      font-size:12px;
+      font-weight:900;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border:1px solid rgba(17,24,39,.10);
+      white-space:nowrap;
+      flex:0 0 auto;
+    }
+    .b-expired{ color:#991b1b; background: rgba(239,68,68,.14); border-color: rgba(239,68,68,.32); }
+    .b-3{ color:#9a3412; background: rgba(245,158,11,.14); border-color: rgba(245,158,11,.34); }
+    .b-5{ color:#854d0e; background: rgba(245,158,11,.10); border-color: rgba(245,158,11,.28); }
+    .b-7{ color:#155e75; background: rgba(6,182,212,.12); border-color: rgba(6,182,212,.30); }
+    .b-safe{ color:#166534; background: rgba(34,197,94,.12); border-color: rgba(34,197,94,.28); }
+
+    /* Settings */
+    .section{
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(17,24,39,.08);
+    }
+    .section h3{
+      margin: 6px 0 10px;
+      font-size: 14px;
+      letter-spacing:.2px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .radio{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      padding: 10px 10px;
+      border-radius: 14px;
+      border:1px solid rgba(17,24,39,.08);
+      background: rgba(255,255,255,.78);
+      margin-bottom: 10px;
+      cursor:pointer;
+    }
+    .radio input{ margin-top:2px; accent-color:#6d73ff; }
+    .radio strong{ display:block; font-size: 14px; }
+    .radio small{ display:block; color:var(--muted); font-size: 12px; margin-top:4px; line-height:1.35; }
+    .radio:hover{ border-color: rgba(109,115,255,.35); box-shadow: 0 10px 22px rgba(109,115,255,.10); }
+
+    .cta{
+      margin-top: 12px;
+      width:100%;
+      border-radius: 16px;
+      padding: 12px 14px;
+      font-size: 14px;
+      font-weight: 900;
+      box-shadow: 0 16px 30px rgba(109,115,255,.22);
+    }
+    .cta[disabled]{ opacity:.6; cursor:not-allowed; box-shadow:none; }
+
+    /* Results */
+    .results{ margin-top:16px; grid-column: 1 / -1; }
+    .status{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom: 10px;
+    }
+    .status .msg{ font-weight:900; }
+    .spinner{
+      width:18px;height:18px;border-radius:999px;
+      border:3px solid rgba(17,24,39,.18);
+      border-top-color: rgba(109,115,255,.85);
+      animation: spin 1s linear infinite;
+      display:none;
+    }
+    .spinner.on{ display:inline-block; }
+    @keyframes spin{ to { transform: rotate(360deg); } }
+
+    .recipe-grid{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap:12px;
+    }
+    @media (max-width: 980px){
+      .recipe-grid{ grid-template-columns: 1fr; }
+    }
+
+    .recipe{
+      border:1px solid rgba(17,24,39,.08);
+      background: rgba(255,255,255,.82);
+      border-radius: 18px;
+      padding: 12px 12px;
+      box-shadow: 0 12px 22px rgba(17,24,39,.08);
+      cursor:pointer;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+      outline:none;
+    }
+    .recipe:hover{
+      transform: translateY(-1px);
+      border-color: rgba(109,115,255,.35);
+      box-shadow: 0 16px 30px rgba(17,24,39,.10);
+    }
+    .recipe:focus-visible{
+      border-color: rgba(109,115,255,.45);
+      box-shadow: 0 0 0 4px rgba(109,115,255,.22), 0 16px 30px rgba(17,24,39,.10);
+    }
+
+    .recipe h4{ margin:0; font-size: 16px; letter-spacing:.2px; line-height:1.2; }
+    .meta{ margin-top:6px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+    .tag{
+      font-size:12px;
+      font-weight:900;
+      padding: 6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(17,24,39,.10);
+      background: rgba(17,24,39,.04);
+      color: rgba(17,24,39,.78);
+    }
+    .tag.good{ background: rgba(34,197,94,.12); border-color: rgba(34,197,94,.28); color:#166534; }
+    .tag.warn{ background: rgba(245,158,11,.12); border-color: rgba(245,158,11,.28); color:#854d0e; }
+
+    .cols{
+      margin-top:10px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    @media (max-width: 520px){
+      .cols{ grid-template-columns: 1fr; }
+    }
+    .box{
+      border:1px solid rgba(17,24,39,.08);
+      border-radius: 14px;
+      background: rgba(255,255,255,.78);
+      padding: 10px 10px;
+      min-height: 70px;
+    }
+    .box strong{
+      display:block;
+      font-size: 12px;
+      letter-spacing:.2px;
+      color: rgba(17,24,39,.70);
+      margin-bottom:6px;
+    }
+    .chips{ display:flex; flex-wrap:wrap; gap:6px; }
+    .chip{
+      font-size:12px;
+      font-weight:800;
+      padding: 6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(17,24,39,.10);
+      background: rgba(17,24,39,.04);
+      color: rgba(17,24,39,.78);
+      max-width:100%;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    /* AI card */
+    .ai-card{
+      border:1px solid rgba(17,24,39,.08);
+      background: rgba(255,255,255,.82);
+      border-radius: 18px;
+      padding: 14px 14px;
+      box-shadow: 0 12px 22px rgba(17,24,39,.08);
+    }
+    .ai-card h3{ margin:0; font-size: 18px; letter-spacing:.2px; }
+    .ai-cols{
+      margin-top:10px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+    }
+    @media (max-width: 980px){
+      .ai-cols{ grid-template-columns: 1fr; }
+    }
+    .ai-list{
+      margin:8px 0 0;
+      padding-left: 18px;
+      color: rgba(17,24,39,.82);
+      line-height:1.6;
+      font-size: 14px;
+    }
+
+    /* Modal */
+    .modal-overlay{
+      position: fixed;
+      inset: 0;
+      background: rgba(17,24,39,.48);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 9999;
+    }
+    .modal-overlay[hidden]{ display:none; }
+
+    .modal{
+      width: min(920px, 100%);
+      max-height: min(86dvh, 760px);
+      overflow: auto;
+      background: rgba(255,255,255,.98);
+      border: 1px solid rgba(17,24,39,.12);
+      border-radius: 20px;
+      box-shadow: 0 28px 80px rgba(0,0,0,.28);
+    }
+    .modal-hd{
+      position: sticky;
+      top: 0;
+      background: rgba(255,255,255,.98);
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(17,24,39,.08);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      z-index: 1;
+    }
+    .modal-title{
+      font-weight: 950;
+      font-size: 18px;
+      letter-spacing: .2px;
+      line-height: 1.25;
+      margin: 0;
+    }
+    .modal-sub{
+      margin-top: 6px;
+      color: rgba(17,24,39,.65);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    .modal-bd{ padding: 14px 16px 18px; }
+    .modal-grid{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 10px;
+    }
+    @media (max-width: 980px){
+      .modal-grid{ grid-template-columns: 1fr; }
+    }
+    .modal-steps{
+      margin: 8px 0 0;
+      padding-left: 18px;
+      line-height: 1.65;
+      color: rgba(17,24,39,.84);
+      font-size: 14px;
+    }
+    .modal-actions{ display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+    .btn-danger{
+      background: rgba(239,68,68,.12);
+      border: 1px solid rgba(239,68,68,.30);
+      color: #991b1b;
+    }
+  </style>
+</head>
+
+<body data-user-id="{{ user_id }}">
+  <div class="shell">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div>
+          <h1>Recipe Generator</h1>
+          <div class="subtitle">
+            Select ingredients you want to use, then generate recipes from database or AI.
+          </div>
+        </div>
+
+        <div class="actions">
+          <a class="btn" id="backBtn" href="/dashboard/{{ user_id }}">Back to Dashboard</a>
+          <a class="btn btn-primary" id="logoutBtn" href="/">Log out</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <section class="grid">
+        <!-- Left -->
+        <div class="card">
+          <div class="card-hd">
+            <div class="card-title">Ingredients to Use</div>
+            <div class="pill"><span id="selCount">0</span> selected</div>
+          </div>
+
+          <div class="card-bd">
+            <div class="tools">
+              <div class="muted">Tip: Pick only what you plan to cook with today.</div>
+              <div class="mini-actions">
+                <button class="btn btn-mini" id="selectAllBtn" type="button">Select all</button>
+                <button class="btn btn-mini" id="clearBtn" type="button">Clear</button>
+              </div>
+            </div>
+
+            <div class="list" id="ingredientList">
+              <div class="muted">Loading your fridge…</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right -->
+        <div class="card">
+          <div class="card-hd">
+            <div class="card-title">Generation Settings</div>
+          </div>
+
+          <div class="card-bd">
+            <div class="muted">Choose ranking strategy and output mode.</div>
+
+            <div class="section">
+              <h3>Recommendation style</h3>
+
+              <label class="radio">
+                <input type="radio" name="algorithm" value="match" checked />
+                <div>
+                  <strong>Highest Match (fast)</strong>
+                  <small>Prioritizes recipes that use the most of your selected ingredients.</small>
+                </div>
+              </label>
+
+              <label class="radio">
+                <input type="radio" name="algorithm" value="weighted" />
+                <div>
+                  <strong>Balanced Score (recommended)</strong>
+                  <small>Balances match quality and favors ingredients expiring soon.</small>
+                </div>
+              </label>
+
+              <label class="radio">
+                <input type="radio" name="algorithm" value="broad" />
+                <div>
+                  <strong>More Results (relaxed)</strong>
+                  <small>Looser match for more options when you have few ingredients.</small>
+                </div>
+              </label>
+            </div>
+
+            <div class="section">
+              <h3>Output type</h3>
+
+              <label class="radio">
+                <input type="radio" name="mode" value="search" checked />
+                <div>
+                  <strong>Search database recipes</strong>
+                  <small>Finds recipes from the dataset using selected ingredients.</small>
+                </div>
+              </label>
+
+              <label class="radio">
+                <input type="radio" name="mode" value="ai" />
+                <div>
+                  <strong>AI creates a new recipe</strong>
+                  <small>Generates a brand-new recipe idea from your selected ingredients.</small>
+                </div>
+              </label>
+            </div>
+
+            <button class="btn btn-primary cta" id="generateBtn" type="button">
+              Generate Recipes
+            </button>
+          </div>
+        </div>
+
+        <!-- Results -->
+        <div class="card results">
+          <div class="card-hd">
+            <div class="card-title">Results</div>
+            <div class="pill" id="resultPill">Ready</div>
+          </div>
+          <div class="card-bd">
+            <div class="status">
+              <div class="msg" id="statusMsg">Select ingredients, then click “Generate Recipes”.</div>
+              <div class="spinner" id="spinner" aria-label="Loading"></div>
+            </div>
+
+            <div id="resultsArea"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Recipe Detail Modal -->
+  <div id="recipeModal" class="modal-overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-hd">
+        <div>
+          <div id="modalTitle" class="modal-title">...</div>
+          <div id="modalSub" class="modal-sub"></div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-mini" id="modalCopyBtn" type="button">Copy</button>
+          <button class="btn btn-mini btn-danger" id="modalCloseBtn" type="button">Close</button>
+        </div>
+      </div>
+      <div class="modal-bd" id="modalBody"></div>
+    </div>
+  </div>
+
+  <script>
+    // ---------- Utils ----------
+    function escapeHtml(s){
+      return String(s ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+    function nameKey(s){
+      return String(s ?? "").trim().toLowerCase();
+    }
+
+    function parseUserIdFromUrl(){
+      const m = window.location.pathname.match(/\/(\d+)\/?$/);
+      return m ? m[1] : null;
+    }
+
+    function getUserId(){
+      const fromData = (document.body.dataset.userId || "").trim();
+      if (/^\d+$/.test(fromData)) return fromData;
+
+      const fromStorage = (localStorage.getItem("user_id") || "").trim();
+      if (/^\d+$/.test(fromStorage)) return fromStorage;
+
+      return parseUserIdFromUrl();
+    }
+
+    function getCheckedAlgorithm(){
+      return document.querySelector('input[name="algorithm"]:checked')?.value || "match";
+    }
+    function getCheckedMode(){
+      return document.querySelector('input[name="mode"]:checked')?.value || "search";
+    }
+
+    // Normalize expiry bucket (support string/number)
+    function bucketFromExpiryLevel(expiryLevel){
+      const lvl = expiryLevel;
+      if (lvl === 0 || lvl === "expired") return "expired";
+      if (lvl === 3 || lvl === "expiring_3" || lvl === "urgent_3") return "expiring_3";
+      if (lvl === 5 || lvl === "expiring_5" || lvl === "urgent_5") return "expiring_5";
+      if (lvl === 7 || lvl === "expiring_7" || lvl === "urgent_7") return "expiring_7";
+      return "safe";
+    }
+
+    function badgeFor(expiryLevel, daysLeft){
+      const key = bucketFromExpiryLevel(expiryLevel);
+      if (key === "expired") return { cls:"b-expired", text: daysLeft != null ? `Expired · ${daysLeft}d` : "Expired" };
+      if (key === "expiring_3") return { cls:"b-3", text: daysLeft != null ? `≤ 3 days · ${daysLeft}d` : "≤ 3 days" };
+      if (key === "expiring_5") return { cls:"b-5", text: daysLeft != null ? `≤ 5 days · ${daysLeft}d` : "≤ 5 days" };
+      if (key === "expiring_7") return { cls:"b-7", text: daysLeft != null ? `≤ 7 days · ${daysLeft}d` : "≤ 7 days" };
+      return { cls:"b-safe", text: daysLeft != null ? `Safe · ${daysLeft}d` : "Safe" };
+    }
+
+    function normalizeSteps(raw){
+      if (Array.isArray(raw)) return raw.map(s => String(s).trim()).filter(Boolean);
+      if (raw == null) return [];
+      return String(raw).split(/\r?\n+/).map(s => s.trim()).filter(Boolean);
+    }
+
+    function normalizeAiIngredients(raw){
+      const arr = Array.isArray(raw) ? raw : [];
+      const out = [];
+      for (const it of arr){
+        if (typeof it === "string"){
+          const s = it.trim();
+          if (s) out.push(s);
+        } else if (it && typeof it === "object"){
+          const name = String(it.name ?? "").trim();
+          const amt = String(it.amount ?? "").trim();
+          const line = name && amt ? `${name} — ${amt}` : name;
+          if (line) out.push(line);
+        }
+      }
+      return out;
+    }
+
+    function coerceFridgeItems(raw){
+      if (Array.isArray(raw)) return raw;
+      if (raw && typeof raw === "object" && Array.isArray(raw.items)) return raw.items;
+      return [];
+    }
+
+    // ---------- Expiry map (name -> most urgent bucket) ----------
+    const urgencyRank = { expired:0, expiring_3:1, expiring_5:2, expiring_7:3, safe:9 };
+
+    // Map: ingredientNameKey -> { bucket, days_left }
+    const fridgeUrgencyByName = new Map();
+
+    function putUrgency(name, bucket, daysLeft){
+      const key = nameKey(name);
+      if (!key) return;
+
+      const cur = fridgeUrgencyByName.get(key);
+      const next = { bucket, days_left: (typeof daysLeft === "number" ? daysLeft : null) };
+
+      if (!cur){
+        fridgeUrgencyByName.set(key, next);
+        return;
+      }
+
+      // Choose more urgent one (smaller rank); tie -> smaller days_left if both present
+      const curR = urgencyRank[cur.bucket] ?? 9;
+      const nxtR = urgencyRank[next.bucket] ?? 9;
+
+      if (nxtR < curR){
+        fridgeUrgencyByName.set(key, next);
+        return;
+      }
+      if (nxtR === curR){
+        if (cur.days_left == null && next.days_left != null){
+          fridgeUrgencyByName.set(key, next);
+          return;
+        }
+        if (cur.days_left != null && next.days_left != null && next.days_left < cur.days_left){
+          fridgeUrgencyByName.set(key, next);
+          return;
+        }
+      }
+    }
+
+    function expiringCountForNames(names){
+      // Count "soon to expire" = expired or expiring_3/5/7
+      let totalSoon = 0;
+      for (const n of (Array.isArray(names) ? names : [])){
+        const info = fridgeUrgencyByName.get(nameKey(n));
+        if (!info) continue;
+        if (info.bucket !== "safe") totalSoon++;
+      }
+      return totalSoon;
+    }
+
+    // ---------- DOM ----------
+    const userId = getUserId();
+
+    const ingredientListEl = document.getElementById("ingredientList");
+    const selCountEl = document.getElementById("selCount");
+    const generateBtn = document.getElementById("generateBtn");
+    const resultsArea = document.getElementById("resultsArea");
+    const statusMsg = document.getElementById("statusMsg");
+    const spinner = document.getElementById("spinner");
+    const resultPill = document.getElementById("resultPill");
+
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      try{ localStorage.removeItem("user_id"); }catch(e){}
+    });
+
+    document.getElementById("selectAllBtn").addEventListener("click", () => {
+      ingredientListEl.querySelectorAll('input[type="checkbox"][data-id]').forEach(cb => cb.checked = true);
+      updateSelectedCount();
+    });
+
+    document.getElementById("clearBtn").addEventListener("click", () => {
+      ingredientListEl.querySelectorAll('input[type="checkbox"][data-id]').forEach(cb => cb.checked = false);
+      updateSelectedCount();
+    });
+
+    function setLoading(on, msg, pillText){
+      spinner.classList.toggle("on", !!on);
+      if (msg) statusMsg.textContent = msg;
+      if (pillText) resultPill.textContent = pillText;
+      generateBtn.disabled = !!on;
+    }
+
+    function updateSelectedCount(){
+      const checked = ingredientListEl.querySelectorAll('input[type="checkbox"][data-id]:checked').length;
+      selCountEl.textContent = checked;
+    }
+
+    async function loadFridge(){
+      if (!userId){
+        ingredientListEl.innerHTML = `<div class="muted">Missing user ID. Please open as /recipe/&lt;user_id&gt;.</div>`;
+        return;
+      }
+
+      try{
+        ingredientListEl.innerHTML = `<div class="muted">Loading your fridge…</div>`;
+        const resp = await fetch(`/api/fridge/${encodeURIComponent(userId)}`);
+        const raw = await resp.json().catch(() => ({}));
+
+        if (!resp.ok){
+          ingredientListEl.innerHTML = `<div class="muted">Failed to load fridge.</div>`;
+          return;
+        }
+
+        const items = coerceFridgeItems(raw);
+
+        // ✅ rebuild urgency map each time
+        fridgeUrgencyByName.clear();
+        for (const it of items){
+          const nm = it?.name;
+          const bucket = bucketFromExpiryLevel(it?.expiry_level);
+          const daysLeft = (typeof it?.days_left === "number") ? it.days_left : null;
+          putUrgency(nm, bucket, daysLeft);
+        }
+
+        if (!items.length){
+          ingredientListEl.innerHTML = `<div class="muted">Your fridge is empty. Add ingredients first.</div>`;
+          return;
+        }
+
+        // Sort by urgency
+        function bucket(it){
+          return bucketFromExpiryLevel(it?.expiry_level);
+        }
+        items.sort((a,b)=>{
+          const ra = urgencyRank[bucket(a)] ?? 9;
+          const rb = urgencyRank[bucket(b)] ?? 9;
+          if (ra !== rb) return ra - rb;
+          return String(a.name ?? "").localeCompare(String(b.name ?? ""));
+        });
+
+        ingredientListEl.innerHTML = items.map(it=>{
+          const id = it.ingredient_id;
+          const nm = escapeHtml(it.name);
+          const daysLeft = (typeof it.days_left === "number") ? it.days_left : null;
+          const b = badgeFor(it.expiry_level, daysLeft);
+
+          return `
+            <div class="row">
+              <div class="left">
+                <input class="chk" type="checkbox" data-id="${id}" />
+                <div class="name" title="${nm}">${nm}</div>
+              </div>
+              <div class="badge ${b.cls}" title="Expiry status">${escapeHtml(b.text)}</div>
+            </div>
+          `;
+        }).join("");
+
+        ingredientListEl.querySelectorAll('input[type="checkbox"][data-id]').forEach(cb=>{
+          cb.addEventListener("change", updateSelectedCount);
+        });
+
+        updateSelectedCount();
+
+      }catch(e){
+        console.error(e);
+        ingredientListEl.innerHTML = `<div class="muted">Error loading fridge.</div>`;
+      }
+    }
+
+    function collectSelectedIngredientIds(){
+      const ids = [];
+      ingredientListEl.querySelectorAll('input[type="checkbox"][data-id]:checked').forEach(cb=>{
+        const id = Number(cb.dataset.id);
+        if (!Number.isNaN(id)) ids.push(id);
+      });
+      return ids;
+    }
+
+    function algorithmLabel(code){
+      if (code === "weighted") return "Balanced Score";
+      if (code === "broad") return "More Results";
+      return "Highest Match";
+    }
+
+    // ---------- Results rendering ----------
+    function renderSearchRecipes(recipes, algoCode){
+      if (!Array.isArray(recipes) || recipes.length === 0){
+        resultsArea.innerHTML = `<div class="muted">No recipes found. Try “More Results (relaxed)” or select more ingredients.</div>`;
+        return;
+      }
+
+      const algoText = algorithmLabel(algoCode);
+
+      resultsArea.innerHTML = `
+        <div class="recipe-grid">
+          ${recipes.map(r=>{
+            const rid = r.recipe_id;
+            const title = escapeHtml(r.title || "Untitled");
+            const match = (typeof r.match_ratio === "number") ? r.match_ratio : null;
+
+            const matched = Array.isArray(r.available_ingredients) ? r.available_ingredients : [];
+            const missing = Array.isArray(r.missing_ingredients) ? r.missing_ingredients : [];
+
+            const matchText = match === null ? "Match: —" : `Match: ${Math.round(match * 100)}%`;
+            const matchClass = (match !== null && match >= 0.6) ? "good" : "warn";
+
+            // ✅ Expiring soon count among matched ingredients
+            const expSoon = expiringCountForNames(matched);
+            const expText = expSoon > 0 ? `Expiring soon: ${expSoon}` : `Expiring soon: None`;
+            const expClass = expSoon > 0 ? "warn" : "good";
+
+            return `
+              <div class="recipe" data-recipe-id="${rid}" role="button" tabindex="0" aria-label="Open recipe details">
+                <h4>${title}</h4>
+                <div class="meta">
+                  <span class="tag ${matchClass}">${matchText}</span>
+                  <span class="tag ${expClass}">${escapeHtml(expText)}</span>
+                  <span class="tag">${escapeHtml(algoText)}</span>
+                </div>
+
+                <div class="cols">
+                  <div class="box">
+                    <strong>Matched</strong>
+                    <div class="chips">
+                      ${matched.length
+                        ? matched.map(x=>`<span class="chip" title="${escapeHtml(x)}">${escapeHtml(x)}</span>`).join("")
+                        : `<span class="muted">None</span>`}
+                    </div>
+                  </div>
+
+                  <div class="box">
+                    <strong>Missing</strong>
+                    <div class="chips">
+                      ${missing.length
+                        ? missing.map(x=>`<span class="chip" title="${escapeHtml(x)}">${escapeHtml(x)}</span>`).join("")
+                        : `<span class="muted">None</span>`}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join("")}
+        </div>
+      `;
+    }
+
+    function renderAiRecipe(payload){
+      const recipe = payload?.recipe || payload;
+      if (!recipe || typeof recipe !== "object"){
+        resultsArea.innerHTML = `<div class="muted">No AI recipe returned.</div>`;
+        return;
+      }
+
+      const title = escapeHtml(recipe.title || "AI Recipe");
+      const description = escapeHtml(recipe.description || "");
+      const cookingTime = escapeHtml(recipe.cooking_time || "");
+      const difficulty = escapeHtml(recipe.difficulty || "");
+
+      const ingredientLines = normalizeAiIngredients(recipe.ingredients);
+      const steps = normalizeSteps(recipe.steps);
+
+      resultsArea.innerHTML = `
+        <div class="ai-card">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap;">
+            <div>
+              <h3>${title}</h3>
+              ${description
+                ? `<div class="muted" style="margin-top:6px;">${description}</div>`
+                : `<div class="muted" style="margin-top:6px;">Generated based on your selected ingredients.</div>`
+              }
+            </div>
+            <div class="meta" style="margin-top:2px;">
+              ${cookingTime ? `<span class="tag">⏱ ${cookingTime}</span>` : ``}
+              ${difficulty ? `<span class="tag">⭐ ${difficulty}</span>` : ``}
+              <button class="btn btn-mini" id="copyAiBtn" type="button">Copy</button>
+            </div>
+          </div>
+
+          <div class="ai-cols" style="margin-top:12px;">
+            <div>
+              <strong>Ingredients</strong>
+              ${ingredientLines.length
+                ? `<ul class="ai-list">${ingredientLines.map(i=>`<li>${escapeHtml(i)}</li>`).join("")}</ul>`
+                : `<div class="muted" style="margin-top:8px;">None</div>`
+              }
+            </div>
+
+            <div>
+              <strong>Steps</strong>
+              ${steps.length
+                ? `<ol class="modal-steps">${steps.map(s=>`<li>${escapeHtml(s)}</li>`).join("")}</ol>`
+                : `<div class="muted" style="margin-top:8px;">None</div>`
+              }
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById("copyAiBtn")?.addEventListener("click", async () => {
+        const lines = [];
+        lines.push(String(recipe.title || "AI Recipe").trim());
+        if (recipe.description) lines.push("", String(recipe.description).trim());
+
+        if (cookingTime) lines.push("", `Cooking time: ${cookingTime}`);
+        if (difficulty) lines.push(`Difficulty: ${difficulty}`);
+
+        lines.push("", "Ingredients:");
+        if (ingredientLines.length) lines.push(...ingredientLines.map(x => `- ${x}`));
+        else lines.push("- None");
+
+        lines.push("", "Steps:");
+        if (steps.length) lines.push(...steps.map((x,i) => `${i+1}. ${x}`));
+        else lines.push("None");
+
+        const text = lines.join("\n").trim();
+        try{
+          await navigator.clipboard.writeText(text);
+          const btn = document.getElementById("copyAiBtn");
+          if (btn){ btn.textContent = "Copied"; setTimeout(()=>btn.textContent="Copy", 1200); }
+        }catch(e){
+          const btn = document.getElementById("copyAiBtn");
+          if (btn){ btn.textContent = "Copy failed"; setTimeout(()=>btn.textContent="Copy", 1200); }
+        }
+      });
+    }
+
+    // ---------- Modal (recipe details) ----------
+    const modalOverlay = document.getElementById("recipeModal");
+    const modalTitleEl = document.getElementById("modalTitle");
+    const modalSubEl = document.getElementById("modalSub");
+    const modalBodyEl = document.getElementById("modalBody");
+    const modalCopyBtn = document.getElementById("modalCopyBtn");
+    const modalCloseBtn = document.getElementById("modalCloseBtn");
+
+    let lastFocusEl = null;
+    let modalCopyText = "";
+
+    function openModal(title, sub, bodyHtml){
+      lastFocusEl = document.activeElement;
+      modalTitleEl.textContent = title || "Recipe";
+      if (sub){
+        modalSubEl.textContent = sub;
+        modalSubEl.style.display = "";
+      }else{
+        modalSubEl.textContent = "";
+        modalSubEl.style.display = "none";
+      }
+      modalBodyEl.innerHTML = bodyHtml || "";
+      modalCopyBtn.disabled = true;
+      modalCopyBtn.textContent = "Copy";
+      modalOverlay.hidden = false;
+      document.body.style.overflow = "hidden";
+      modalCloseBtn.focus();
+    }
+
+    function closeModal(){
+      modalOverlay.hidden = true;
+      document.body.style.overflow = "";
+      modalBodyEl.innerHTML = "";
+      modalCopyText = "";
+      modalCopyBtn.disabled = true;
+      modalCopyBtn.textContent = "Copy";
+      if (lastFocusEl && typeof lastFocusEl.focus === "function") lastFocusEl.focus();
+    }
+
+    modalCloseBtn.addEventListener("click", closeModal);
+    modalOverlay.addEventListener("click", (e) => { if (e.target === modalOverlay) closeModal(); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !modalOverlay.hidden) closeModal(); });
+
+    modalCopyBtn.addEventListener("click", async () => {
+      if (!modalCopyText) return;
+      try{
+        await navigator.clipboard.writeText(modalCopyText);
+        modalCopyBtn.textContent = "Copied";
+        setTimeout(() => modalCopyBtn.textContent = "Copy", 1200);
+      }catch(e){
+        modalCopyBtn.textContent = "Copy failed";
+        setTimeout(() => modalCopyBtn.textContent = "Copy", 1200);
+      }
+    });
+
+    async function showRecipeDetail(recipeId){
+      if (!recipeId) return;
+
+      openModal("Loading…", "Fetching recipe details", `<div class="muted">Loading…</div>`);
+
+      try{
+        const url = userId
+          ? `/api/recipes/${encodeURIComponent(recipeId)}?user_id=${encodeURIComponent(userId)}`
+          : `/api/recipes/${encodeURIComponent(recipeId)}`;
+
+        const resp = await fetch(url);
+        const data = await resp.json().catch(() => ({}));
+        if (!resp.ok) throw new Error(data?.error || "Failed to load recipe.");
+
+        const title = String(data.title || "Recipe");
+        const allIngredients = Array.isArray(data.ingredient_list) ? data.ingredient_list.map(String) : [];
+        const missing = Array.isArray(data.missing_ingredients) ? data.missing_ingredients.map(String) : [];
+
+        const missingSet = new Set(missing.map(x => nameKey(x)));
+        const matched = allIngredients.filter(x => !missingSet.has(nameKey(x)));
+
+        const steps = normalizeSteps(data.steps);
+
+        const expSoon = expiringCountForNames(matched);
+        const expText = expSoon > 0 ? `Expiring soon: ${expSoon}` : `Expiring soon: None`;
+        const expClass = expSoon > 0 ? "warn" : "good";
+
+        const summary =
+          `${matched.length}/${allIngredients.length} ingredients available`
+          + (missing.length ? ` · ${missing.length} missing` : ` · Missing: None`)
+          + ` · ${expText}`;
+
+        const body = `
+          <div class="meta" style="margin-top:2px;">
+            <span class="tag good">Available: ${matched.length}</span>
+            <span class="tag">Total: ${allIngredients.length}</span>
+            ${missing.length
+              ? `<span class="tag warn">Missing: ${missing.length}</span>`
+              : `<span class="tag good">Missing: None</span>`}
+            <span class="tag ${expClass}">${escapeHtml(expText)}</span>
+          </div>
+
+          <div class="modal-grid" style="margin-top:12px;">
+            <div class="box">
+              <strong>Matched</strong>
+              <div class="chips">
+                ${matched.length
+                  ? matched.map(x=>`<span class="chip" title="${escapeHtml(x)}">${escapeHtml(x)}</span>`).join("")
+                  : `<span class="muted">None</span>`}
+              </div>
+            </div>
+
+            <div class="box">
+              <strong>Missing</strong>
+              <div class="chips">
+                ${missing.length
+                  ? missing.map(x=>`<span class="chip" title="${escapeHtml(x)}">${escapeHtml(x)}</span>`).join("")
+                  : `<span class="muted">None</span>`}
+              </div>
+            </div>
+          </div>
+
+          <div class="section" style="margin-top:14px;">
+            <h3>Steps</h3>
+            ${steps.length
+              ? `<ol class="modal-steps">${steps.map(s=>`<li>${escapeHtml(s)}</li>`).join("")}</ol>`
+              : `<div class="muted">None</div>`
+            }
+          </div>
+        `;
+
+        openModal(title, summary, body);
+
+        const lines = [];
+        lines.push(title);
+        lines.push("", "Matched:");
+        lines.push(matched.length ? matched.map(x => `- ${x}`).join("\n") : "- None");
+        lines.push("", "Missing:");
+        lines.push(missing.length ? missing.map(x => `- ${x}`).join("\n") : "- None");
+        lines.push("", expText);
+        lines.push("", "Steps:");
+        lines.push(steps.length ? steps.map((x,i)=>`${i+1}. ${x}`).join("\n") : "None");
+        modalCopyText = lines.join("\n").trim();
+        modalCopyBtn.disabled = false;
+
+      }catch(e){
+        openModal("Error", "", `<div class="muted">${escapeHtml(e.message || "Unknown error")}</div>`);
+      }
+    }
+
+    // Click / keyboard open for database recipes
+    resultsArea.addEventListener("click", (e) => {
+      const card = e.target.closest(".recipe[data-recipe-id]");
+      if (!card) return;
+      showRecipeDetail(card.dataset.recipeId);
+    });
+    resultsArea.addEventListener("keydown", (e) => {
+      const card = e.target.closest(".recipe[data-recipe-id]");
+      if (!card) return;
+      if (e.key === "Enter" || e.key === " "){
+        e.preventDefault();
+        showRecipeDetail(card.dataset.recipeId);
+      }
+    });
+
+    // ---------- Generate ----------
+    generateBtn.addEventListener("click", async () => {
+      if (!userId){
+        setLoading(false, "Missing user ID.", "Error");
+        return;
+      }
+
+      const ingredientIds = collectSelectedIngredientIds();
+      if (ingredientIds.length === 0){
+        resultsArea.innerHTML = "";
+        setLoading(false, "Please select at least one ingredient.", "Ready");
+        return;
+      }
+
+      const algorithm = getCheckedAlgorithm();
+      const mode = getCheckedMode();
+
+      const endpoint = (mode === "ai")
+        ? `/api/recipes/generate_ai/${encodeURIComponent(userId)}`
+        : `/api/recipes/generate/${encodeURIComponent(userId)}`;
+
+      setLoading(true, "Generating…", "Working");
+
+      try{
+        const resp = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type":"application/json" },
+          body: JSON.stringify({ ingredient_ids: ingredientIds, algorithm })
+        });
+
+        const data = await resp.json().catch(() => ({}));
+
+        if (!resp.ok){
+          const msg = data?.error || "Request failed.";
+          setLoading(false, msg, "Error");
+          resultsArea.innerHTML = `<div class="muted">${escapeHtml(msg)}</div>`;
+          return;
+        }
+
+        if (mode === "ai"){
+          renderAiRecipe(data);
+          setLoading(false, "Done. Here’s your AI-generated recipe.", "Done");
+        }else{
+          renderSearchRecipes(data.recipes, algorithm);
+          setLoading(false, `Done. Found ${Array.isArray(data.recipes) ? data.recipes.length : 0} recipe(s).`, "Done");
+        }
+
+      }catch(e){
+        console.error(e);
+        setLoading(false, "Network error. Please try again.", "Error");
+        resultsArea.innerHTML = `<div class="muted">Network error.</div>`;
+      }
+    });
+
+    // ---------- Init ----------
+    function setLoading(on, msg, pillText){
+      spinner.classList.toggle("on", !!on);
+      if (msg) statusMsg.textContent = msg;
+      if (pillText) resultPill.textContent = pillText;
+      generateBtn.disabled = !!on;
+    }
+
+    loadFridge();
+  </script>
+</body>
+</html>

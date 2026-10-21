@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#667eea" />
+  <title>Log In | 剩食魔法師</title>
+
+  <link rel="manifest" href="/static/manifest.json" />
+
+  <style>
+    :root{
+      --bg1:#667eea;
+      --bg2:#764ba2;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --ring: rgba(102,126,234,.28);
+      --shadow: 0 14px 44px rgba(15, 23, 42, 0.14);
+      --shadow2: 0 10px 26px rgba(15, 23, 42, 0.10);
+      --radius: 18px;
+      --danger:#ef4444;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+      color:var(--text);
+      min-height:100vh;
+      background: radial-gradient(1200px 800px at 15% 15%, rgba(255,255,255,.22), transparent 60%),
+                  radial-gradient(900px 700px at 85% 35%, rgba(255,255,255,.16), transparent 55%),
+                  linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 100%);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+    }
+
+    .wrap{ width:min(980px, 100%); }
+
+    .shell{
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.18);
+      backdrop-filter: blur(10px);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:18px 22px;
+      border-bottom:1px solid rgba(255,255,255,.18);
+    }
+
+    .brand{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      color:#fff;
+      min-width: 0;
+    }
+
+    .logo{
+      width:42px;height:42px;
+      border-radius:14px;
+      background: rgba(255,255,255,.16);
+      display:grid;place-items:center;
+      border:1px solid rgba(255,255,255,.22);
+      flex:0 0 auto;
+    }
+
+    .brand h1{
+      margin:0;
+      font-size:18px;
+      letter-spacing:.2px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .brand .sub{
+      display:block;
+      font-size:12px;
+      opacity:.85;
+      margin-top:2px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .nav{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+
+    .btn{
+      appearance:none;
+      border:0;
+      cursor:pointer;
+      border-radius: 12px;
+      padding:10px 14px;
+      font-weight:900;
+      font-size:14px;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      transition: transform .15s ease, box-shadow .15s ease, background .15s ease, opacity .15s ease;
+      user-select:none;
+      white-space:nowrap;
+    }
+    .btn:focus{ outline:none; box-shadow:0 0 0 4px var(--ring); }
+
+    .btn.primary{
+      color:#1e293b;
+      background:#fff;
+    }
+    .btn.primary:hover{ transform: translateY(-1px); box-shadow: var(--shadow2); }
+
+    .btn.ghost{
+      color:#fff;
+      background: rgba(255,255,255,.14);
+      border:1px solid rgba(255,255,255,.26);
+    }
+    .btn.ghost:hover{ transform: translateY(-1px); box-shadow: var(--shadow2); }
+
+    .content{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 420px;
+    }
+
+    /* Left (desktop info) */
+    .left{
+      padding:34px 30px;
+      color:#fff;
+      border-right:1px solid rgba(255,255,255,.18);
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      gap:14px;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      background: rgba(255,255,255,.16);
+      border:1px solid rgba(255,255,255,.22);
+      font-size:13px;
+      font-weight:900;
+      letter-spacing:.2px;
+      width: fit-content;
+    }
+
+    .left h2{
+      margin:0;
+      font-size:34px;
+      line-height:1.12;
+      letter-spacing:-.4px;
+    }
+
+    .left p{
+      margin:0;
+      color: rgba(255,255,255,.86);
+      line-height:1.7;
+      font-size:15px;
+      max-width: 50ch;
+    }
+
+    .tips{
+      display:grid;
+      gap:10px;
+      margin-top:6px;
+    }
+
+    .tip{
+      background: rgba(255,255,255,.14);
+      border:1px solid rgba(255,255,255,.20);
+      border-radius: 16px;
+      padding:12px 12px;
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+    }
+    .tip .ic{
+      width:34px;height:34px;
+      border-radius: 12px;
+      display:grid;place-items:center;
+      background: rgba(255,255,255,.16);
+      border:1px solid rgba(255,255,255,.18);
+      flex:0 0 auto;
+    }
+    .tip b{ display:block; font-size:14px; margin-bottom:2px; }
+    .tip span{ display:block; font-size:13px; opacity:.88; line-height:1.45; }
+
+    /* Right (form) */
+    .right{
+      background: rgba(255,255,255,.92);
+      padding:30px 26px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .card{
+      width: min(420px, 100%);
+      background: var(--card);
+      border:1px solid rgba(15,23,42,.08);
+      box-shadow: 0 10px 24px rgba(15,23,42,.08);
+      border-radius: 22px;
+      padding:18px 16px;
+    }
+
+    .title{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin-bottom:6px;
+    }
+    .title .lock{
+      width:38px;height:38px;
+      border-radius: 14px;
+      display:grid;place-items:center;
+      background: linear-gradient(135deg, rgba(102,126,234,.18), rgba(118,75,162,.18));
+      border:1px solid rgba(102,126,234,.20);
+      flex:0 0 auto;
+    }
+
+    .card h3{
+      margin:0;
+      font-size:18px;
+      letter-spacing:.2px;
+      font-weight:900;
+    }
+
+    .card .desc{
+      margin:0 0 14px;
+      color: var(--muted);
+      font-size:13px;
+      line-height:1.55;
+    }
+
+    form{ margin:0; }
+
+    .field{ margin-bottom:12px; }
+    label{
+      display:block;
+      font-weight:900;
+      font-size:13px;
+      margin-bottom:6px;
+      color:#0f172a;
+    }
+
+    input{
+      width:100%;
+      padding:12px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(15,23,42,.14);
+      background:#fff;
+      font-size:14px;
+      outline:none;
+      transition: box-shadow .15s ease, border-color .15s ease;
+    }
+    input:focus{
+      border-color: rgba(102,126,234,.65);
+      box-shadow: 0 0 0 4px var(--ring);
+    }
+
+    .actions{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:10px;
+      margin-top: 8px;
+    }
+    .actions .btn{
+      width:100%;
+      padding:12px 14px;
+      border-radius: 14px;
+    }
+
+    .mutelinks{
+      margin-top:10px;
+      font-size:13px;
+      color: var(--muted);
+      line-height:1.6;
+      text-align:center;
+    }
+    .mutelinks a{
+      color:#4f46e5;
+      text-decoration:none;
+      font-weight:900;
+    }
+    .mutelinks a:hover{ text-decoration:underline; }
+
+    /* Optional error message box (if backend renders a message) */
+    .msg{
+      margin-top:10px;
+      font-size:13px;
+      padding:10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(239,68,68,.25);
+      background: rgba(239,68,68,.10);
+      color: #991b1b;
+    }
+
+    /* Mobile adjustments */
+    @media (max-width: 860px){
+      body{ padding: 14px; }
+
+      .content{
+        grid-template-columns: 1fr;
+        min-height: unset;
+      }
+
+      /* hide left on mobile to reduce height */
+      .left{ display:none; }
+
+      .right{
+        padding: 18px 14px;
+        background: transparent;
+      }
+      .card{
+        border-radius: 20px;
+        padding: 16px 14px;
+      }
+    }
+
+    @media (max-width: 520px){
+      /* Topbar becomes two rows to avoid text squeeze */
+      .topbar{
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        padding: 14px 14px;
+      }
+
+      .brand{ width:100%; }
+      .brand h1{ font-size:16px; }
+
+      /* allow sub line wrap on very narrow screens */
+      .brand .sub{
+        font-size:11px;
+        white-space: normal;
+        line-height: 1.25;
+      }
+
+      .nav{
+        width: 100%;
+        justify-content: flex-end;
+        flex-wrap: nowrap;
+        gap: 8px;
+      }
+
+      .nav .btn{
+        padding: 8px 12px;
+        font-size: 13px;
+        border-radius: 10px;
+      }
+
+      input{ padding: 11px 12px; }
+      .card h3{ font-size: 17px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="shell">
+      <div class="topbar">
+        <div class="brand">
+          <div>
+            <h1>剩食魔法師</h1>
+            <span class="sub">Log in to manage your fridge and recipes</span>
+          </div>
+        </div>
+
+        <div class="nav">
+          <a class="btn ghost" href="/">Home</a>
+          <a class="btn primary" href="/register-page">Sign Up</a>
+        </div>
+      </div>
+
+      <div class="content">
+        <!-- Desktop-only left section -->
+        <section class="left">
+          <div class="badge">Log In</div>
+          <h2>Welcome back</h2>
+          <p>
+            Continue tracking your fridge and get recipe recommendations that prioritize expiring ingredients.
+          </p>
+
+          <div class="tips" aria-label="Highlights">
+            <div class="tip">
+              <div class="ic" aria-hidden="true">🧊</div>
+              <div>
+                <b>Fridge tracking</b>
+                <span>See what’s expiring soon at a glance.</span>
+              </div>
+            </div>
+
+            <div class="tip">
+              <div class="ic" aria-hidden="true">🤖</div>
+              <div>
+                <b>Smart recommendations</b>
+                <span>Ranked by match rate or weighted score.</span>
+              </div>
+            </div>
+
+            <div class="tip">
+              <div class="ic" aria-hidden="true">🚫</div>
+              <div>
+                <b>Exclusions</b>
+                <span>Filter out ingredients you want to avoid.</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Form -->
+        <section class="right">
+          <div class="card">
+            <div class="title">
+              <div class="lock" aria-hidden="true">🔐</div>
+              <div>
+                <h3>Log In</h3>
+                <div class="desc" style="margin:4px 0 0;">Enter your username and password.</div>
+              </div>
+            </div>
+
+            <!-- IMPORTANT:
+                 If your backend handles login on /login-page, keep this.
+                 Otherwise change action to your POST endpoint.
+            -->
+            <form method="POST" action="/login-page">
+              <div class="field">
+                <label for="username">Username</label>
+                <input id="username" name="username" type="text" autocomplete="username" required />
+              </div>
+
+              <div class="field">
+                <label for="password">Password</label>
+                <input id="password" name="password" type="password" autocomplete="current-password" required />
+              </div>
+
+              <div class="actions">
+                <button class="btn primary" type="submit">Log In</button>
+                <a class="btn ghost" href="/register-page">Create an Account</a>
+              </div>
+            </form>
+
+            <div class="mutelinks">
+              New here? <a href="/register-page">Create an account</a>.
+            </div>
+
+            <!-- If you later implement flash messages, render here -->
+            {#
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                <div class="msg">{{ messages[0] }}</div>
+              {% endif %}
+            {% endwith %}
+            #}
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/static/service-worker.js")
+          .catch(err => console.error("Service Worker registration failed:", err));
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+Flask
+Flask-SQLAlchemy
+PyMySQL
+Werkzeug
+groq
+pandas
+openai
+pydantic

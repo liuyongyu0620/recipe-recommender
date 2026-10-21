@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Dietary Exclusions</title>
+  <style>
+    :root{
+      --bg1:#667eea;
+      --bg2:#764ba2;
+      --card:#ffffff;
+      --muted:#6b7280;
+      --text:#111827;
+      --line:#e5e7eb;
+      --shadow: 0 18px 50px rgba(0,0,0,.18);
+      --shadow-soft: 0 10px 30px rgba(17,24,39,.10);
+      --radius: 18px;
+      --radius-lg: 26px;
+      --primary1:#667eea;
+      --primary2:#764ba2;
+      --danger:#ef4444;
+      --danger-soft:#fee2e2;
+      --chip:#eef2ff;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji";
+      color:var(--text);
+      background: linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 100%);
+      min-height: 100svh;
+      padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+      display:flex;
+      justify-content:center;
+      align-items:center;
+    }
+
+    .container{
+      width: min(1180px, 100%);
+      background: rgba(255,255,255,.95);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      border: 1px solid rgba(255,255,255,.35);
+      backdrop-filter: blur(10px);
+    }
+
+    .topbar{
+      padding: 22px 22px 16px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 14px;
+      border-bottom: 1px solid rgba(229,231,235,.7);
+      background: linear-gradient(180deg, rgba(255,255,255,.88), rgba(255,255,255,.70));
+    }
+
+    .title-wrap{
+      display:flex;
+      gap: 12px;
+      align-items:flex-start;
+      min-width: 0;
+    }
+
+    .icon{
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display:grid;
+      place-items:center;
+      background: rgba(102,126,234,.12);
+      border: 1px solid rgba(102,126,234,.22);
+      flex: 0 0 auto;
+      margin-top: 2px;
+    }
+
+    .icon svg{ width: 22px; height:22px; }
+
+    h1{
+      margin:0;
+      font-size: clamp(22px, 3.2vw, 34px);
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      word-break: break-word;
+    }
+
+    .subtitle{
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+      max-width: 62ch;
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      padding-top: 2px;
+    }
+
+    .btn{
+      border: 1px solid rgba(229,231,235,.9);
+      background: rgba(255,255,255,.9);
+      color: #111827;
+      padding: 10px 14px;
+      border-radius: 12px;
+      cursor:pointer;
+      font-weight: 700;
+      font-size: 14px;
+      box-shadow: 0 6px 16px rgba(17,24,39,.06);
+      transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      white-space:nowrap;
+    }
+    .btn:hover{ transform: translateY(-1px); box-shadow: 0 10px 22px rgba(17,24,39,.10); }
+    .btn:active{ transform: translateY(0px); }
+
+    .btn-primary{
+      border: none;
+      background: linear-gradient(135deg, var(--primary1), var(--primary2));
+      color:white;
+      box-shadow: 0 14px 26px rgba(102,126,234,.25);
+    }
+
+    .content{
+      padding: 20px 22px 24px;
+      background: radial-gradient(1200px 700px at 20% -10%, rgba(102,126,234,.10), transparent 60%),
+                  radial-gradient(900px 600px at 110% 10%, rgba(118,75,162,.10), transparent 55%),
+                  rgba(249,250,251,.55);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.25fr .95fr;
+      gap: 18px;
+      align-items:start;
+    }
+
+    .panel{
+      background: rgba(255,255,255,.92);
+      border: 1px solid rgba(229,231,235,.9);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-soft);
+      overflow:hidden;
+    }
+
+    .panel-hd{
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid rgba(229,231,235,.85);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      background: linear-gradient(180deg, rgba(255,255,255,.9), rgba(255,255,255,.72));
+    }
+
+    .panel-title{
+      margin:0;
+      font-size: 16px;
+      letter-spacing:-.01em;
+    }
+
+    .pill{
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: var(--chip);
+      border: 1px solid rgba(102,126,234,.25);
+      color: #374151;
+      font-size: 13px;
+      font-weight: 800;
+      white-space:nowrap;
+    }
+
+    .panel-bd{
+      padding: 14px 16px 16px;
+    }
+
+    .empty{
+      padding: 22px 14px;
+      text-align:center;
+      color: var(--muted);
+      background: rgba(249,250,251,.6);
+      border: 1px dashed rgba(229,231,235,.95);
+      border-radius: 16px;
+    }
+    .empty strong{
+      display:block;
+      color:#111827;
+      font-size: 18px;
+      margin-bottom: 6px;
+      letter-spacing:-.01em;
+    }
+
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+    }
+
+    .item{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      padding: 12px 12px;
+      border: 1px solid rgba(229,231,235,.95);
+      border-radius: 14px;
+      background: rgba(255,255,255,.95);
+    }
+
+    .item-left{
+      min-width:0;
+    }
+
+    .item-name{
+      font-weight: 850;
+      letter-spacing:-.01em;
+      text-transform: none;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      max-width: 100%;
+    }
+
+    .item-meta{
+      margin-top: 4px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .btn-danger{
+      border: 1px solid rgba(239,68,68,.25);
+      background: var(--danger-soft);
+      color: #991b1b;
+      box-shadow:none;
+      padding: 9px 12px;
+      border-radius: 12px;
+      font-weight: 900;
+    }
+
+    .form-row{
+      display:grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items:end;
+      margin-top: 6px;
+    }
+
+    label{
+      display:block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+      font-weight: 800;
+      letter-spacing: .02em;
+    }
+
+    input[type="text"]{
+      width: 100%;
+      padding: 14px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(229,231,235,.95);
+      outline:none;
+      font-size: 15px;
+      background: rgba(255,255,255,.92);
+      transition: box-shadow .12s ease, border-color .12s ease;
+    }
+
+    input[type="text"]:focus{
+      border-color: rgba(102,126,234,.55);
+      box-shadow: 0 0 0 4px rgba(102,126,234,.16);
+    }
+
+    .help{
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .note{
+      margin-top: 12px;
+      padding: 12px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(102,126,234,.18);
+      background: rgba(102,126,234,.08);
+      font-size: 13px;
+      color:#374151;
+      line-height:1.5;
+    }
+
+    .toast{
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      background: rgba(17,24,39,.92);
+      color: #fff;
+      padding: 10px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .18s ease, transform .18s ease;
+      max-width: min(560px, 92vw);
+      text-align:center;
+      z-index: 9999;
+    }
+    .toast.show{
+      opacity: 1;
+      transform: translateX(-50%) translateY(-6px);
+    }
+
+    /* Mobile: stack panels and prevent header squeezing */
+    @media (max-width: 900px){
+      .grid{ grid-template-columns: 1fr; }
+      .topbar{ align-items:flex-start; }
+      .actions{ justify-content:flex-start; }
+    }
+
+    /* Small screens: tighter paddings */
+    @media (max-width: 520px){
+      .topbar{ padding: 18px 16px 12px; }
+      .content{ padding: 16px; }
+      .panel-hd{ padding: 14px 14px 10px; }
+      .panel-bd{ padding: 12px 14px 14px; }
+      .form-row{ grid-template-columns: 1fr; }
+      .btn, .btn-danger{ width: 100%; justify-content:center; }
+      .pill{ margin-left:auto; }
+      .item{ align-items:flex-start; flex-direction:column; }
+      .item .btn-danger{ width: 100%; }
+    }
+  </style>
+</head>
+
+<!-- Flask 會傳 user_id 進來：render_template('avoid.html', user_id=user_id) -->
+<body data-user-id="{{ user_id }}">
+  <div class="container">
+    <div class="topbar">
+      <div class="title-wrap">
+        <div style="min-width:0;">
+          <h1>Dietary Exclusions</h1>
+          <div class="subtitle">
+            Add ingredients you want to avoid. They will be filtered out from recipe recommendations.
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn" id="backBtn" type="button">Back to Dashboard</button>
+        <button class="btn btn-primary" id="logoutBtn" type="button">Log out</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="grid">
+        <!-- Left: list -->
+        <div class="panel">
+          <div class="panel-hd">
+            <h3 class="panel-title">Exclusion List</h3>
+            <div class="pill" id="countPill">0 item(s)</div>
+          </div>
+          <div class="panel-bd">
+            <div id="noData" class="empty" style="display:none;">
+              <strong>No exclusions yet</strong>
+              Add ingredients on the right to start filtering recommendations.
+            </div>
+            <div id="avoidList" class="list"></div>
+          </div>
+        </div>
+
+        <!-- Right: add -->
+        <div class="panel">
+          <div class="panel-hd">
+            <h3 class="panel-title">Add an Exclusion</h3>
+            <div class="pill">Auto-filter</div>
+          </div>
+          <div class="panel-bd">
+            <div class="form-row">
+              <div>
+                <label for="ingredientName">Ingredient name</label>
+                <input id="ingredientName" type="text" placeholder="e.g., peanuts, milk, cilantro" autocomplete="off" />
+              </div>
+              <button class="btn btn-primary" id="addBtn" type="button">Add</button>
+            </div>
+
+            <div class="note">
+              Exclusions apply when generating recipes. Any recipe containing an excluded ingredient will be filtered out.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ---------- helpers ----------
+    function showToast(msg){
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => t.classList.remove("show"), 1600);
+    }
+
+    function getUserId(){
+      // Prefer Flask injected user_id
+      const fromDataset = document.body?.dataset?.userId;
+      if (fromDataset && /^\d+$/.test(fromDataset)) return fromDataset;
+
+      // Fallback: /avoid/<user_id>
+      const parts = window.location.pathname.split("/").filter(Boolean);
+      const last = parts[parts.length - 1];
+      if (last && /^\d+$/.test(last)) return last;
+
+      return null;
+    }
+
+    const userId = getUserId();
+    if (!userId){
+      alert("Missing user id. Please log in again.");
+      window.location.href = "/";
+    }
+
+    // ---------- navigation ----------
+    document.getElementById("backBtn").addEventListener("click", () => {
+      window.location.href = `/dashboard/${userId}`;
+    });
+
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      // If you also store login state in localStorage, clear here if needed.
+      window.location.href = "/";
+    });
+
+    // ---------- api ----------
+    async function loadAvoidList(){
+      const avoidList = document.getElementById("avoidList");
+      const noData = document.getElementById("noData");
+      const countPill = document.getElementById("countPill");
+
+      avoidList.innerHTML = "";
+      noData.style.display = "none";
+
+      try{
+        const resp = await fetch(`/api/avoid/${userId}`);
+        const data = await resp.json();
+
+        const items = Array.isArray(data?.items) ? data.items : [];
+        countPill.textContent = `${items.length} item(s)`;
+
+        if (!items.length){
+          noData.style.display = "block";
+          return;
+        }
+
+        items.forEach(item => {
+          const row = document.createElement("div");
+          row.className = "item";
+
+          const left = document.createElement("div");
+          left.className = "item-left";
+
+          const name = document.createElement("div");
+          name.className = "item-name";
+          name.textContent = item.name || "(Unnamed)";
+
+          const meta = document.createElement("div");
+          meta.className = "item-meta";
+
+          left.appendChild(name);
+          left.appendChild(meta);
+
+          const btn = document.createElement("button");
+          btn.className = "btn btn-danger";
+          btn.type = "button";
+          btn.textContent = "Remove";
+          btn.addEventListener("click", () => removeAvoidItem(item.ingredient_id));
+
+          row.appendChild(left);
+          row.appendChild(btn);
+          avoidList.appendChild(row);
+        });
+      }catch(e){
+        console.error(e);
+        showToast("Failed to load exclusions.");
+      }
+    }
+
+    async function addAvoidItem(){
+      const input = document.getElementById("ingredientName");
+      const name = (input.value || "").trim();
+      if (!name){
+        showToast("Please enter an ingredient name.");
+        input.focus();
+        return;
+      }
+
+      try{
+        const resp = await fetch(`/api/avoid/${userId}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name })
+        });
+
+        const data = await resp.json();
+        if (!resp.ok){
+          showToast(data?.error || "Failed to add.");
+          return;
+        }
+
+        input.value = "";
+        showToast("Added to exclusions.");
+        await loadAvoidList();
+      }catch(e){
+        console.error(e);
+        showToast("Network error.");
+      }
+    }
+
+    async function removeAvoidItem(ingredientId){
+      try{
+        const resp = await fetch(`/api/avoid/${userId}/${ingredientId}`, { method: "DELETE" });
+        const data = await resp.json().catch(() => ({}));
+
+        if (!resp.ok){
+          showToast(data?.error || "Failed to remove.");
+          return;
+        }
+
+        showToast("Removed.");
+        await loadAvoidList();
+      }catch(e){
+        console.error(e);
+        showToast("Network error.");
+      }
+    }
+
+    // ---------- events ----------
+    document.getElementById("addBtn").addEventListener("click", addAvoidItem);
+    document.getElementById("ingredientName").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") addAvoidItem();
+    });
+
+    // init
+    loadAvoidList();
+  </script>
+</body>
+</html>

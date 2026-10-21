@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+
+# Database
+*.db
+
+# 不要上傳 RecipeNLG 大檔
+db/RecipeNLG_dataset.csv
+
+# Virtual env
+venv/
+.env

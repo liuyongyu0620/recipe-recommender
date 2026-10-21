@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>食譜生成</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Microsoft YaHei', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 20px;
+        }
+        .header h1 {
+            color: #333;
+            font-size: 32px;
+        }
+        .header-right {
+            display: flex;
+            gap: 10px;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s;
+        }
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            font-weight: 600;
+        }
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        .section {
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        .section h2 {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        .ingredients-list {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            background: white;
+        }
+        .ingredient-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            transition: background 0.2s;
+        }
+        .ingredient-item:hover {
+            background: #f0f0f0;
+        }
+        .ingredient-item:last-child {
+            border-bottom: none;
+        }
+        .ingredient-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-right: 12px;
+            cursor: pointer;
+        }
+        .ingredient-item label {
+            flex: 1;
+            cursor: pointer;
+            user-select: none;
+            color: #333;
+        }
+        .empty-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+        .empty-message p {
+            font-size: 16px;
+        }
+        .priority-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .radio-option {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .radio-option:hover {
+            border-color: #667eea;
+            background: #f9f9f9;
+        }
+        .radio-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            margin-right: 12px;
+            cursor: pointer;
+        }
+        .radio-option label {
+            flex: 1;
+            cursor: pointer;
+            user-select: none;
+        }
+        .radio-option .description {
+            font-size: 12px;
+            color: #666;
+            margin-left: 30px;
+            margin-top: 4px;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        .btn-generate {
+            flex: 1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-generate:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .btn-generate:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .btn-back {
+            flex: 1;
+            background: #f0f0f0;
+            color: #333;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-back:hover {
+            background: #e0e0e0;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+            font-size: 16px;
+            display: none;
+        }
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border: 1px solid #f5c6cb;
+            display: none;
+        }
+        .selected-count {
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍳 食譜生成</h1>
+            <div class="header-right">
+                <button class="btn btn-secondary" onclick="goDashboard()">回到功能選擇</button>
+                <button class="btn btn-secondary" onclick="logout()">登出</button>
+            </div>
+        </div>
+
+        <div id="errorMessage" class="error-message"></div>
+        <div id="loading" class="loading">載入中...</div>
+
+        <div class="content" id="content" style="display: none;">
+            <!-- 左側：選擇食材 -->
+            <div class="section">
+                <h2>📦 選擇優先食材</h2>
+                <div class="selected-count" id="selectedCount">已選擇：0 個</div>
+                <div class="ingredients-list" id="ingredientsList"></div>
+            </div>
+
+            <!-- 右側：優先級選擇 -->
+            <div class="section">
+                <h2>⚙️ 生成設定</h2>
+                <div class="priority-section">
+                    <div>
+                        <p style="margin-bottom: 12px; color: #333; font-weight: 600; font-size: 15px;">✅ 選擇的食材將優先用於生成食譜</p>
+                        <p style="font-size: 13px; color: #666; line-height: 1.6;">
+                            系統將根據您選擇的食材推薦相關食譜，幫助您有效使用剩餘或即期食材。
+                        </p>
+                    </div>
+
+                    <div style="border-top: 2px solid #e0e0e0; padding-top: 20px; margin-top: 20px;">
+                        <p style="margin-bottom: 12px; color: #333; font-weight: 600;">排除過敏原</p>
+                        <p style="font-size: 14px; color: #666; margin-bottom: 15px;">系統會自動排除您設定的過敏原和忌口食材</p>
+                    </div>
+
+                    <div style="background: #f0f7ff; border-left: 4px solid #667eea; padding: 12px; border-radius: 4px; margin-top: 20px;">
+                        <p style="font-size: 13px; color: #333; margin-bottom: 6px;">💡 提示</p>
+                        <p style="font-size: 12px; color: #666;">
+                            您可以在左側選擇多個食材，系統將推薦能使用這些食材的食譜。
+                        </p>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn-generate" id="generateBtn" onclick="generateRecipes()">生成食譜</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const userId = window.location.pathname.split('/').pop();
+        let fridgeIngredients = [];
+        let selectedIngredients = new Set();
+
+        // 初始化頁面
+        window.addEventListener('load', function() {
+            loadIngredients();
+        });
+
+        // 載入冰箱食材
+        async function loadIngredients() {
+            const loading = document.getElementById('loading');
+            const content = document.getElementById('content');
+            const errorMessage = document.getElementById('errorMessage');
+
+            try {
+                loading.style.display = 'block';
+                errorMessage.innerHTML = '';
+
+                const response = await fetch(`/api/fridge/${userId}`);
+                const data = await response.json();
+
+                loading.style.display = 'none';
+
+                if (!response.ok) {
+                    throw new Error(data.error || '載入失敗');
+                }
+
+                if (data.items && data.items.length > 0) {
+                    fridgeIngredients = data.items;
+                    displayIngredients();
+                    content.style.display = 'grid';
+                } else {
+                    errorMessage.innerHTML = '<div style="background: #fff3cd; color: #856404; padding: 15px; border-radius: 5px; border: 1px solid #ffeeba;">❌ 冰箱是空的，請先添加食材後再生成食譜。</div>';
+                    content.style.display = 'none';
+                }
+            } catch (error) {
+                loading.style.display = 'none';
+                errorMessage.innerHTML = `<div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; border: 1px solid #f5c6cb;">錯誤: ${error.message}</div>`;
+                content.style.display = 'none';
+            }
+        }
+
+        // 顯示食材清單
+        function displayIngredients() {
+            const ingredientsList = document.getElementById('ingredientsList');
+            
+            ingredientsList.innerHTML = fridgeIngredients.map(item => `
+                <div class="ingredient-item">
+                    <input type="checkbox" id="ingredient_${item.ingredient_id}" 
+                        value="${item.ingredient_id}"
+                        onchange="updateSelection()">
+                    <label for="ingredient_${item.ingredient_id}">${escapeHtml(item.name)}</label>
+                </div>
+            `).join('');
+        }
+
+        // 更新選擇計數
+        function updateSelection() {
+            selectedIngredients.clear();
+            document.querySelectorAll('.ingredient-item input[type="checkbox"]:checked').forEach(checkbox => {
+                selectedIngredients.add(parseInt(checkbox.value));
+            });
+            document.getElementById('selectedCount').textContent = `已選擇：${selectedIngredients.size} 個`;
+        }
+
+        // 生成食譜
+        async function generateRecipes() {
+            const generateBtn = document.getElementById('generateBtn');
+            const errorMessage = document.getElementById('errorMessage');
+
+            errorMessage.innerHTML = '';
+
+            if (selectedIngredients.size === 0) {
+                errorMessage.innerHTML = '<div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; border: 1px solid #f5c6cb;">請至少選擇一個食材</div>';
+                return;
+            }
+
+            try {
+                generateBtn.disabled = true;
+                generateBtn.textContent = '生成中...';
+
+                const selectedArray = Array.from(selectedIngredients);
+                const resp = await fetch(`/api/recipes/generate/${userId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ingredient_ids: selectedArray })
+                });
+                const data = await resp.json();
+
+                if (!resp.ok) {
+                    throw new Error(data.error || '生成失敗');
+                }
+
+                // 顯示簡單結果（之後可改為更好的渲染）
+                const titles = (data.recipes || []).map(r => `• ${escapeHtml(r.title)}`).join('\n');
+                alert(titles ? `✅ 推薦食譜:\n${titles}` : '目前沒有符合的食譜');
+
+                generateBtn.disabled = false;
+                generateBtn.textContent = '生成食譜';
+            } catch (error) {
+                errorMessage.innerHTML = `<div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; border: 1px solid #f5c6cb;">錯誤: ${error.message}</div>`;
+                generateBtn.disabled = false;
+                generateBtn.textContent = '生成食譜';
+            }
+        }
+
+        // 返回
+        function goDashboard() {
+            window.location.href = `/dashboard/${userId}`;
+        }
+
+        // 登出
+        function logout() {
+            if (confirm('確定要登出嗎？')) {
+                window.location.href = '/';
+            }
+        }
+
+        // 防止XSS攻擊
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+    </script>
+</body>
+</html>

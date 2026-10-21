@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <!-- IMPORTANT: fixes mobile scaling / squeezed text -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>My Fridge • Leftover Wizard</title>
+
+  <style>
+    :root{
+      --bg1:#7d8bf2;
+      --bg2:#6b4aa9;
+      --panel:#ffffff;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --border:#e5e7eb;
+      --shadow: 0 14px 40px rgba(15, 23, 42, 0.18);
+      --shadow-soft: 0 10px 30px rgba(15, 23, 42, 0.10);
+
+      --brand1:#6d7cf3;
+      --brand2:#6b4aa9;
+
+      --radius-xl: 26px;
+      --radius-lg: 18px;
+      --radius-md: 14px;
+
+      --pad: clamp(16px, 2.6vw, 34px);
+    }
+
+    *{ box-sizing:border-box; }
+    html, body { height:100%; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      color:var(--text);
+      background: radial-gradient(1200px 700px at 18% 10%, rgba(255,255,255,.18) 0%, rgba(255,255,255,0) 55%),
+                  linear-gradient(135deg, var(--bg1), var(--bg2));
+      /* Center on desktop, but still scroll when content is taller */
+      min-height: 100svh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding:
+        calc(var(--pad) + env(safe-area-inset-top))
+        calc(var(--pad) + env(safe-area-inset-right))
+        calc(var(--pad) + env(safe-area-inset-bottom))
+        calc(var(--pad) + env(safe-area-inset-left));
+    }
+
+    .shell{
+      width: min(1180px, 100%);
+      background: rgba(255,255,255,0.16);
+      border: 1px solid rgba(255,255,255,0.20);
+      border-radius: var(--radius-xl);
+      padding: 18px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+    }
+
+    .panel{
+      background: var(--panel);
+      border-radius: calc(var(--radius-xl) - 6px);
+      overflow:hidden;
+    }
+
+    /* ---------- Top Bar ---------- */
+    .topbar{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+      padding: 26px 28px;
+      border-bottom: 1px solid rgba(17,24,39,.08);
+      flex-wrap: wrap; /* key for mobile */
+    }
+
+    .titleblock{
+      min-width: 240px;
+      flex: 1 1 420px;
+    }
+
+    .title{
+      margin:0;
+      font-size: 42px;
+      letter-spacing: -0.02em;
+      line-height: 1.05;
+    }
+
+    .subtitle{
+      margin: 10px 0 0 0;
+      color: var(--muted);
+      line-height: 1.45;
+      max-width: 60ch;
+    }
+
+    .actions{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      flex: 0 1 auto;
+      flex-wrap: wrap;
+    }
+
+    .btn{
+      appearance:none;
+      border: 1px solid rgba(17,24,39,.12);
+      background: #fff;
+      color: var(--text);
+      font-weight: 700;
+      padding: 10px 14px;
+      border-radius: 12px;
+      cursor:pointer;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      white-space: nowrap;
+      transition: transform .08s ease, box-shadow .15s ease, background .15s ease;
+      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+    }
+    .btn:hover{ transform: translateY(-1px); }
+    .btn:active{ transform: translateY(0); }
+
+    .btn.primary{
+      border: none;
+      color:#fff;
+      background: linear-gradient(135deg, var(--brand1), var(--brand2));
+      box-shadow: 0 10px 22px rgba(109, 124, 243, .30);
+    }
+
+    /* ---------- Content ---------- */
+    .content{
+      padding: 22px 22px 26px 22px;
+      background: linear-gradient(180deg, #f7f8ff, #f4f5ff);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 18px;
+      align-items:start;
+    }
+
+    .card{
+      background:#fff;
+      border: 1px solid rgba(17,24,39,.08);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-soft);
+      overflow:hidden;
+    }
+    .card-hd{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding: 16px 16px;
+      border-bottom: 1px solid rgba(17,24,39,.06);
+      background: rgba(255,255,255,.7);
+    }
+    .card-title{
+      font-weight: 900;
+      letter-spacing: -0.01em;
+      margin:0;
+      font-size: 18px;
+    }
+    .pill{
+      font-weight: 800;
+      font-size: 13px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      border: 1px solid rgba(109,124,243,.35);
+      color: #4c5bd7;
+      background: rgba(109,124,243,.10);
+      white-space: nowrap;
+    }
+
+    .card-bd{ padding: 16px; }
+
+    /* ---------- Empty state ---------- */
+    .empty{
+      min-height: 240px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding: 18px;
+      color: var(--muted);
+      border-radius: 16px;
+      background: linear-gradient(180deg, rgba(109,124,243,.06), rgba(107,74,169,.05));
+      border: 1px dashed rgba(109,124,243,.35);
+    }
+    .empty strong{
+      display:block;
+      color: var(--text);
+      font-size: 22px;
+      margin-bottom: 6px;
+      letter-spacing: -0.01em;
+    }
+
+    /* ---------- Ingredient list ---------- */
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+    }
+    .row{
+      display:grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items:center;
+      padding: 12px 12px;
+      border: 1px solid rgba(17,24,39,.08);
+      border-radius: 14px;
+      background:#fff;
+    }
+    .name{
+      font-weight: 900;
+      letter-spacing: -0.01em;
+      margin:0;
+      line-height:1.15;
+    }
+    .meta{
+      margin: 6px 0 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height:1.25;
+    }
+    .right{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      justify-content:flex-end;
+      flex-wrap: wrap;
+    }
+
+    .badge{
+      font-size: 12px;
+      font-weight: 900;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(17,24,39,.10);
+      background:#f9fafb;
+      white-space: nowrap;
+    }
+    .b-expired{ color:#b42318; background:#fee4e2; border-color:#fda29b; }
+    .b-3{ color:#b93815; background:#ffead5; border-color:#fdba74; }
+    .b-5{ color:#b54708; background:#fef3c7; border-color:#fcd34d; }
+    .b-7{ color:#0369a1; background:#e0f2fe; border-color:#7dd3fc; }
+    .b-safe{ color:#15803d; background:#dcfce7; border-color:#86efac; }
+
+    .icon-btn{
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      border: 1px solid rgba(17,24,39,.12);
+      background:#fff;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      transition: transform .08s ease;
+    }
+    .icon-btn:hover{ transform: translateY(-1px); }
+    .icon-btn:active{ transform: translateY(0); }
+    .trash{ width:18px; height:18px; display:block; }
+
+    /* ---------- Add form ---------- */
+    .hint{
+      margin: 8px 0 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .form{
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
+    }
+    .field label{
+      display:block;
+      font-size: 13px;
+      font-weight: 900;
+      color: #4b5563;
+      margin-bottom: 6px;
+    }
+    input{
+      width:100%;
+      padding: 12px 13px;
+      border-radius: 14px;
+      border: 1px solid rgba(17,24,39,.14);
+      outline: none;
+      font-size: 15px;
+      background:#fff;
+    }
+    input:focus{
+      border-color: rgba(109,124,243,.65);
+      box-shadow: 0 0 0 4px rgba(109,124,243,.18);
+    }
+
+    .form-row{
+      display:flex;
+      gap: 12px;
+      flex-wrap: wrap; /* key for mobile */
+      align-items:flex-end;
+    }
+    .form-row .field{
+      flex: 1 1 220px;
+      min-width: 200px;
+    }
+    .form-row .field.date{
+      flex: 0 1 240px;
+      min-width: 200px;
+    }
+    .add-btn{
+      flex: 0 1 150px;
+      min-width: 140px;
+      height: 44px;
+      border-radius: 14px;
+      border:none;
+      font-weight: 900;
+      cursor:pointer;
+      color:#fff;
+      background: linear-gradient(135deg, var(--brand1), var(--brand2));
+      box-shadow: 0 10px 22px rgba(109,124,243,.28);
+      transition: transform .08s ease;
+    }
+    .add-btn:hover{ transform: translateY(-1px); }
+    .add-btn:active{ transform: translateY(0); }
+
+    .legend{
+      display:flex;
+      gap:10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 980px){
+      body{ align-items:flex-start; } /* prevent odd vertical centering on mid screens */
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 560px){
+      .topbar{ padding: 20px 18px; }
+      .title{ font-size: 34px; }
+      .subtitle{ font-size: 14px; }
+      .actions{ width:100%; }
+      .actions .btn{ flex: 1 1 180px; }
+      .content{ padding: 16px; }
+      .card-bd{ padding: 14px; }
+      .empty{ min-height: 200px; }
+      .form-row .field,
+      .form-row .field.date{
+        flex: 1 1 100%;
+        min-width: 0;
+      }
+      .add-btn{
+        flex: 1 1 100%;
+        width: 100%;
+        min-width: 0;
+      }
+      .row{
+        grid-template-columns: 1fr;
+      }
+      .right{
+        justify-content:flex-start;
+      }
+    }
+  </style>
+</head>
+
+<!-- If Flask renders this template, this will become a real number. If not, JS will fallback to URL parsing. -->
+<body data-user-id="{{ user_id }}">
+  <div class="shell">
+    <div class="panel">
+      <div class="topbar">
+        <div class="titleblock">
+          <h1 class="title">My Fridge</h1>
+          <p class="subtitle">Track ingredients and expiry dates to prioritize what expires first.</p>
+        </div>
+
+        <div class="actions">
+          <a class="btn" id="backBtn" href="#">Back to Dashboard</a>
+          <a class="btn primary" id="logoutBtn" href="#">Log out</a>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="grid">
+          <!-- Left: list -->
+          <div class="card">
+            <div class="card-hd">
+              <h2 class="card-title">Ingredient List</h2>
+              <span class="pill" id="countPill">0 item(s)</span>
+            </div>
+            <div class="card-bd" id="listArea">
+              <!-- filled by JS -->
+            </div>
+          </div>
+
+          <!-- Right: add -->
+          <div class="card">
+            <div class="card-hd">
+              <h2 class="card-title">Add Ingredient</h2>
+              <span class="pill">Expiry-aware</span>
+            </div>
+
+            <div class="card-bd">
+              <form class="form" id="addForm">
+                <div class="form-row">
+                  <div class="field">
+                    <label for="ingredientName">Ingredient name</label>
+                    <input id="ingredientName" type="text" placeholder="e.g., eggs, milk, tomatoes" required />
+                  </div>
+
+                  <div class="field date">
+                    <label for="expiryDate">Expiry date (optional)</label>
+                    <input id="expiryDate" type="date" />
+                  </div>
+
+                  <button class="add-btn" type="submit">Add</button>
+                </div>
+
+                <p class="hint">
+                  Expiry dates are used to show “expiring in 3/5/7 days” and can help prioritize recipes that use ingredients expiring soon.
+                </p>
+
+                <div class="legend" aria-label="Expiry legend">
+                  <span class="badge b-expired">Expired / ≤ 3 days</span>
+                  <span class="badge b-5">≤ 5 days</span>
+                  <span class="badge b-7">≤ 7 days</span>
+                  <span class="badge b-safe">Safe</span>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div><!-- /grid -->
+      </div><!-- /content -->
+    </div><!-- /panel -->
+  </div><!-- /shell -->
+
+  <script>
+    // ---------- Utilities ----------
+    function parseUserIdFromUrl() {
+      // matches trailing number in /fridge/123 or /fridge/123/
+      const m = window.location.pathname.match(/\/(\d+)\/?$/);
+      return m ? m[1] : null;
+    }
+    function getUserId() {
+      const fromData = (document.body.dataset.userId || "").trim();
+      if (/^\d+$/.test(fromData)) return fromData;
+      const fromUrl = parseUserIdFromUrl();
+      return fromUrl;
+    }
+
+    function expiryBadge(level) {
+      // backend 回傳的是數字: 0/3/5/7/999
+      // 也兼容你未來可能改成字串: "expired", "expiring_3"...
+      if (level === 0 || level === "expired") return { cls: "badge b-expired", text: "Expired" };
+      if (level === 3 || level === "expiring_3" || level === "urgent_3") return { cls: "badge b-expired", text: "≤ 3 days" };
+      if (level === 5 || level === "expiring_5" || level === "urgent_5") return { cls: "badge b-5", text: "≤ 5 days" };
+      if (level === 7 || level === "expiring_7" || level === "urgent_7") return { cls: "badge b-7", text: "≤ 7 days" };
+      return { cls: "badge b-safe", text: "Safe" };
+    }
+
+
+    // ---------- Navigation ----------
+    const userId = getUserId();
+    const backBtn = document.getElementById("backBtn");
+    backBtn.href = userId ? `/dashboard/${userId}` : `/`;
+
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      // No server session in your current backend, so logout = go home
+      window.location.href = "/";
+    });
+
+    // ---------- API ----------
+    const listArea = document.getElementById("listArea");
+    const countPill = document.getElementById("countPill");
+
+    async function loadFridge() {
+      if (!userId) {
+        listArea.innerHTML = `<div class="empty"><div><strong>Missing user ID</strong>Please open this page as <code>/fridge/&lt;user_id&gt;</code>.</div></div>`;
+        return;
+      }
+
+      try {
+        const resp = await fetch(`/api/fridge/${userId}`);
+        if (!resp.ok) throw new Error("Failed to load fridge");
+
+        const raw = await resp.json();
+        const items = Array.isArray(raw) ? raw : (raw.items || []);
+        countPill.textContent = `${items.length} item(s)`;
+
+        if (!items.length) {
+          listArea.innerHTML = `
+            <div class="empty">
+              <div>
+                <strong>Your fridge is empty</strong>
+                Add some ingredients on the right to get started.
+              </div>
+            </div>`;
+          return;
+        }
+
+        // build list
+        const wrap = document.createElement("div");
+        wrap.className = "list";
+
+        items.forEach(it => {
+          const row = document.createElement("div");
+          row.className = "row";
+
+          const left = document.createElement("div");
+          const nm = document.createElement("p");
+          nm.className = "name";
+          nm.textContent = it.name || "(Unnamed)";
+
+          const meta = document.createElement("p");
+          meta.className = "meta";
+
+          const exp = it.expiry_date ? `Expiry: ${it.expiry_date}` : "Expiry: not set";
+          const days = (typeof it.days_left === "number") ? ` • Days left: ${it.days_left}` : "";
+          meta.textContent = exp + days;
+
+          left.appendChild(nm);
+          left.appendChild(meta);
+
+          const right = document.createElement("div");
+          right.className = "right";
+
+          const b = expiryBadge(it.expiry_level);
+          const badge = document.createElement("span");
+          badge.className = b.cls;
+          badge.textContent = b.text;
+
+          const del = document.createElement("button");
+          del.className = "icon-btn";
+          del.type = "button";
+          del.title = "Remove";
+          del.innerHTML = `
+            <svg class="trash" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M9 3h6m-8 4h10m-1 0-1 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 7"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M10 11v7M14 11v7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>`;
+          del.addEventListener("click", async () => {
+            await deleteItem(it.ingredient_id);
+          });
+
+          right.appendChild(badge);
+          right.appendChild(del);
+
+          row.appendChild(left);
+          row.appendChild(right);
+          wrap.appendChild(row);
+        });
+
+        listArea.innerHTML = "";
+        listArea.appendChild(wrap);
+      } catch (e) {
+        console.error(e);
+        listArea.innerHTML = `
+          <div class="empty">
+            <div>
+              <strong>Could not load your fridge</strong>
+              Please check the server console and try again.
+            </div>
+          </div>`;
+      }
+    }
+
+    async function addItem(name, expiryDate) {
+      const payload = { name: name };
+      if (expiryDate) payload.expiry_date = expiryDate;
+
+      const resp = await fetch(`/api/fridge/${userId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      if (!resp.ok) {
+        const msg = await resp.text().catch(() => "");
+        throw new Error(msg || "Add failed");
+      }
+    }
+
+    async function deleteItem(ingredientId) {
+      const resp = await fetch(`/api/fridge/${userId}/${ingredientId}`, { method: "DELETE" });
+      if (!resp.ok) {
+        const msg = await resp.text().catch(() => "");
+        alert(msg || "Delete failed");
+        return;
+      }
+      await loadFridge();
+    }
+
+    // ---------- Form ----------
+    document.getElementById("addForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const nameEl = document.getElementById("ingredientName");
+      const dateEl = document.getElementById("expiryDate");
+
+      const name = (nameEl.value || "").trim();
+      const expiryDate = (dateEl.value || "").trim(); // YYYY-MM-DD or ""
+
+      if (!name) return;
+
+      try {
+        await addItem(name, expiryDate);
+        nameEl.value = "";
+        dateEl.value = "";
+        await loadFridge();
+      } catch (err) {
+        console.error(err);
+        alert("Failed to add ingredient. Please check your input and try again.");
+      }
+    });
+
+    // Init
+    loadFridge();
+  </script>
+</body>
+</html>
